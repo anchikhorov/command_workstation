@@ -11,6 +11,7 @@ import {MatDialogModule} from "@angular/material/dialog";
 import {MatTableModule} from '@angular/material/table';
 import {MatListModule} from '@angular/material/list';
 import {MatMenuModule} from '@angular/material/menu';
+import {MatIconModule} from '@angular/material/icon';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import {MatMenuModule} from '@angular/material/menu';
     MatDialogModule,
     MatTableModule,
     MatListModule,
-    MatMenuModule
+    MatMenuModule,
+    MatIconModule
   ]
 })
 export class AngularMaterialModule {}

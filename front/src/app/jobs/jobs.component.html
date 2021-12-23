@@ -1,6 +1,16 @@
-<!-- <p *ngFor="let job of jobs;">
-    {{job.id}}  {{job.jobname}}  {{job.user}}  {{job.size}} Mbyte  {{job.pages}}  {{job.created}}  {{job.printer}}  {{job.foldprogram}}  {{job.state}}
-</p> -->
+<!-- <mat-toolbar color="primary">
+      <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>My App</span>
+      <span class="example-spacer"></span>
+      <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
+        <mat-icon>favorite</mat-icon>
+      </button>
+      <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
+        <mat-icon>share</mat-icon>
+      </button>
+</mat-toolbar> -->
 <table mat-table [dataSource]="jobs" class="mat-elevation-z8 table">
     <!-- Position Column -->
     <ng-container matColumnDef="id">
@@ -66,7 +76,14 @@
 </div>
 <mat-menu #contextMenu="matMenu">
     <ng-template matMenuContent let-item="row">
-        <button mat-menu-item (click)="onContextMenuAction1(clickedRow.values().next().value)">Action 1</button>
-        <button mat-menu-item (click)="onContextMenuAction2(clickedRow.values().next().value)">Action 2</button>
+        <button 
+        mat-menu-item (click)="onContextMenuAction1(clickedRow.values().next().value)"
+        (contextmenu)="onRightClick($event)"
+        >Action 1</button>
+        <button 
+        mat-menu-item (click)="onContextMenuAction2(clickedRow.values().next().value)"
+        (contextmenu)="onRightClick($event)"
+        >Action 2</button>
     </ng-template>
 </mat-menu>
+<embed type="image/png" src="http://10.117.124.175/ScanInterface/print.getPrintPreview?id=n9YC52YewP" width="800" height="500">

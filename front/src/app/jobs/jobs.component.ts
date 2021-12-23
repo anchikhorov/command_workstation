@@ -58,6 +58,10 @@ export class JobsComponent implements OnInit, OnDestroy {
     return _.isEqual(this.clickedRow.values().next().value, row)
   }
 
+  onRightClick(event: { preventDefault: () => void; }) {
+    event.preventDefault();
+  }
+
   ngOnDestroy() {
     this.jobsSub.unsubscribe();
   }

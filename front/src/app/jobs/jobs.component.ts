@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { Subscription } from 'rxjs';
 import * as _ from "lodash";
 import { Job } from './job.model';
 import { JobsService } from './jobs.service';
+import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-jobs',
@@ -12,12 +13,15 @@ import { JobsService } from './jobs.service';
 })
 export class JobsComponent implements OnInit, OnDestroy {
   jobs: Job[] = []
+  img : SafeUrl | null = null;
   private jobsSub!: Subscription;
+  private previewSub!: Subscription;
   displayedColumns: string[] = ['id', 'jobname', 'user', 'size', 'pages', 'created', 'printer', 'foldprogram', 'state'];
   clickedRow = new Set<PeriodicElement>();
 
   constructor(
     private jobservise: JobsService,
+    private sanitizer:DomSanitizer
   ) { }
 
   ngOnInit(): void {
@@ -50,8 +54,32 @@ export class JobsComponent implements OnInit, OnDestroy {
   }
 
   onRowClick(row: PeriodicElement) {
+    if(this.previewSub){
+      this.previewSub.unsubscribe();
+    }
+    if (!this.isEqual(row)){
+      this.getPriview()
+    }
+
     this.clickedRow.clear();
     this.clickedRow.add(row) 
+    
+  }
+
+  getPriview(){
+    this.jobservise.getPreview()
+    this.previewSub = this.jobservise.renderPreview().subscribe(
+      {
+        next: (value: any) => {
+            const mediaType = 'application/image';
+            const blob = new Blob([value], { type: mediaType });
+            const unsafeImg = URL.createObjectURL(blob);
+            this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
+        },
+        error: (e: any) => console.error(e),
+        complete: () => console.info('complete') 
+      }
+    );
   }
 
   isEqual(row: PeriodicElement){
@@ -64,6 +92,7 @@ export class JobsComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.jobsSub.unsubscribe();
+    this.previewSub.unsubscribe();
   }
 
 }

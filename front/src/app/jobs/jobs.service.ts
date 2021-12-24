@@ -4,6 +4,7 @@ import { Observable, timer, Subscription, Subject } from "rxjs";
 import { map, switchMap,takeUntil} from 'rxjs/operators';
 import { Job } from "./job.model"
 import * as moment from 'moment';
+import { response } from 'express';
 
 const BACKEND_URL: string = "http://localhost:3000/jobs"
 
@@ -13,6 +14,7 @@ const BACKEND_URL: string = "http://localhost:3000/jobs"
 export class JobsService implements OnDestroy{
   private jobs: Job[] = []
   private jobsPublisher: Subject<Job[]> = new Subject<Job[]>();
+  private previewPublisher = new Subject<any>();
   private alljobs$!: Subscription;
   private stopPolling = new Subject();
 
@@ -42,6 +44,18 @@ export class JobsService implements OnDestroy{
 
   renderJobs(): Observable<Job[]> {
     return this.jobsPublisher.asObservable();
+  }
+
+  getPreview(){
+    let url = "http://10.117.124.175/ScanInterface/print.getPrintPreview?id=0OB6meMKHM"
+    //let url = "http://10.117.124.175/ScanInterface/image.getFilteredData?id=EnoJ0qLsit&x=0&y=0&w=0&h=0&w_out=600&highquality=0&set_filters_from_printparams=0&index=338011640384210916"
+    this.http.get(url, { responseType: 'blob' }).subscribe(response =>{
+      this.previewPublisher.next(response);
+    });
+  }
+
+  renderPreview(): Observable<any> {
+    return this.previewPublisher.asObservable();
   }
 
   ngOnDestroy() {

@@ -16,3 +16,21 @@
   .row-is-clicked {
     background-color: rgb(155, 153, 153);
   }
+
+  .content{
+    height: 100%;
+    width: 100%;
+    background-color: rgb(155, 153, 153);;
+  }
+
+  .preview-img{
+    width: 100%;
+  }
+
+  .rotateimg180 {
+    -webkit-transform:rotate(180deg);
+    -moz-transform: rotate(180deg);
+    -ms-transform: rotate(180deg);
+    -o-transform: rotate(180deg);
+    transform: rotate(180deg);
+  }

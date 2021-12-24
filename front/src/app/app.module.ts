@@ -6,6 +6,7 @@ import { AppComponent } from './app.component';
 import { JobsComponent } from './jobs/jobs.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularMaterialModule } from './theme/angular-material.module';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { AngularMaterialModule } from './theme/angular-material.module';
     AppRoutingModule,
     HttpClientModule,
     BrowserAnimationsModule,
-    AngularMaterialModule
+    AngularMaterialModule,
+    FlexLayoutModule
   ],
   bootstrap: [AppComponent]
 })

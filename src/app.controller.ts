@@ -15,10 +15,12 @@ export class AppController {
     if (!request.cookies['session']) {
       return this.appService.getSession()
         .then(session => this.appService.getAllJobs(session)
-          .then(jobs => {
+          .then(jobs => this.appService.setSessionTimeout(session)
+          .then(() => this.appService.setPrinter(session)
+          .then(() => {
             response.cookie('session', session)
             return jobs
-          }));
+          }))));
     }
     else {
       return this.appService.getAllJobs(request.cookies['session'])

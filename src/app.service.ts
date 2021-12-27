@@ -24,6 +24,70 @@ export class AppService {
     return getSessionPromise()
   }
 
+
+  setSessionTimeout(session): Promise<any> {
+    let verb: string = "setSessionTimeout";
+    let params: any = [session,1800];
+
+    const setSessionTimeoutPromise = () => {
+      return new Promise((resolve, reject) => {
+        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
+          if (err) {
+            return reject(err);
+          }
+
+          resolve(data);
+        });
+      });
+    }
+    return setSessionTimeoutPromise()
+  }
+
+
+  setPrinter(session): Promise<any> {
+    let verb: string = "print.setParam";
+    let params: any = [session,"printer","ROWE"];
+
+    const setPrinterPromise = () => {
+      return new Promise((resolve, reject) => {
+        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
+          // console.log(session)
+          // console.log(err)
+          if (err) {
+          
+            return reject(err);
+          }
+          // console.log(data)
+          resolve(data);
+        });
+      });
+    }
+    return setPrinterPromise()
+  }
+
+ 
+  loadJobFromSpooler(session, jobId): Promise<any> {
+    let verb: string = "print.loadJobFromSpooler";
+    let params: any = [session,jobId];
+
+    const loadJobFromSpoolerPromise = () => {
+      return new Promise((resolve, reject) => {
+        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
+          // console.log(session)
+          // console.log(err)
+          if (err) {
+          
+            return reject(err);
+          }
+          // console.log(data)
+          resolve(data);
+        });
+      });
+    }
+    return loadJobFromSpoolerPromise()
+  }
+
+
   getAllJobs(session): Promise<any> {
     let verb: string = "print_admin.getAllJobs";
     let params: any = [session];

@@ -4,7 +4,7 @@ import { Observable, timer, Subscription, Subject } from "rxjs";
 import { map, switchMap,takeUntil} from 'rxjs/operators';
 import { Job } from "./job.model"
 import * as moment from 'moment';
-import { response } from 'express';
+//import { response } from 'express';
 
 const BACKEND_URL: string = "http://localhost:3000/jobs"
 
@@ -47,8 +47,7 @@ export class JobsService implements OnDestroy{
   }
 
   getPreview(){
-    let url = "http://10.117.124.175/ScanInterface/print.getPrintPreview?id=0OB6meMKHM"
-    //let url = "http://10.117.124.175/ScanInterface/image.getFilteredData?id=EnoJ0qLsit&x=0&y=0&w=0&h=0&w_out=600&highquality=0&set_filters_from_printparams=0&index=338011640384210916"
+    let url = "http://10.117.124.175/ScanInterface/print.getPrintPreview?id=Bezfl0sSWC&w=200"
     this.http.get(url, { responseType: 'blob' }).subscribe(response =>{
       this.previewPublisher.next(response);
     });

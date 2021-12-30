@@ -18,6 +18,7 @@ export class JobsComponent implements OnInit, OnDestroy {
   private previewSub!: Subscription;
   displayedColumns: string[] = ['id', 'jobname', 'user', 'size', 'pages', 'created', 'printer', 'foldprogram', 'state'];
   clickedRow = new Set<PeriodicElement>();
+  loading = false
 
   constructor(
     private jobservise: JobsService,
@@ -58,7 +59,8 @@ export class JobsComponent implements OnInit, OnDestroy {
       this.previewSub.unsubscribe();
     }
     if (!this.isEqual(row)){
-      this.getPriview()
+      this.loading = true
+      this.getPreview(row.id)
     }
 
     this.clickedRow.clear();
@@ -66,15 +68,20 @@ export class JobsComponent implements OnInit, OnDestroy {
     
   }
 
-  getPriview(){
-    this.jobservise.getPreview()
+  getPreview(id: number){
+    this.img = null
+    if(this.previewSub){
+      this.previewSub.unsubscribe()
+    }
+    this.jobservise.getPreview(id)
     this.previewSub = this.jobservise.renderPreview().subscribe(
       {
         next: (value: any) => {
-            const mediaType = 'application/image';
+            const mediaType = 'image/png';
             const blob = new Blob([value], { type: mediaType });
             const unsafeImg = URL.createObjectURL(blob);
             this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
+            this.loading = false
         },
         error: (e: any) => console.error(e),
         complete: () => console.info('complete') 

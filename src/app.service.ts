@@ -65,28 +65,6 @@ export class AppService {
     return setPrinterPromise()
   }
 
- 
-  loadJobFromSpooler(session, jobId): Promise<any> {
-    let verb: string = "print.loadJobFromSpooler";
-    let params: any = [session,jobId];
-
-    const loadJobFromSpoolerPromise = () => {
-      return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          // console.log(session)
-          // console.log(err)
-          if (err) {
-          
-            return reject(err);
-          }
-          // console.log(data)
-          resolve(data);
-        });
-      });
-    }
-    return loadJobFromSpoolerPromise()
-  }
-
 
   getAllJobs(session): Promise<any> {
     let verb: string = "print_admin.getAllJobs";

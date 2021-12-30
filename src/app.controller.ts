@@ -11,7 +11,6 @@ export class AppController {
 
   @Get()
   getInitialJobs(@Req() request: Request, @Res({ passthrough: true }) response: Response): any {
-    //console.log("request.cookies", request.cookies)
     if (!request.cookies['session']) {
       return this.appService.getSession()
         .then(session => this.appService.getAllJobs(session)

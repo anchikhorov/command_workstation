@@ -12,7 +12,7 @@
       </button>
 </mat-toolbar> -->
 <div class="content" fxLayout="row" fxFlexFill (contextmenu)="onRightClick($event)">
-    <div fxFlex="10" class="cockpit">
+    <div fxFlex="9" class="cockpit">
 
     </div>
     <div fxFlex="80" class="job-table-body">
@@ -80,7 +80,7 @@
         <!-- <cdk-virtual-scroll-viewport appendOnly itemSize="250" class="example-viewport">
 
         </cdk-virtual-scroll-viewport> -->
-        <div fxFlex="10" fxLayout="column" fxLayoutAlign="start center" class="job-small-preview scrollable-content">
+        <div fxFlex="11" fxLayout="column" fxLayoutAlign="start center" class="job-small-preview scrollable-content">
             <div fxLayout="column" fxLayoutAlign="space-around center" *ngIf="!img"  class="preview-window">
                 <mat-spinner *ngIf="loading" diameter="40" ></mat-spinner>
             </div>

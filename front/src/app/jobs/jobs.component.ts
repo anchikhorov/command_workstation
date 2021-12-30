@@ -62,6 +62,7 @@ export class JobsComponent implements OnInit, OnDestroy {
     this.jobservise.deleteJob(row.id).subscribe(()=>{
       this.isDeleted = true
       this.img = null
+      this.clickedRow.clear();
     }
       
     )
@@ -70,6 +71,7 @@ export class JobsComponent implements OnInit, OnDestroy {
   }
 
   onRowClick(row: PeriodicElement) {
+    
     if(this.previewSub){
       this.previewSub.unsubscribe();
     }

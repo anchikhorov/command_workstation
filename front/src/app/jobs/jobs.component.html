@@ -62,7 +62,7 @@
         </table>
         </div>
         <div fxFlex="11" fxLayout="column" fxLayoutAlign="start center" class="job-small-preview scrollable-content">
-            <div fxLayout="column" fxLayoutAlign="space-around center" *ngIf="!img && isDeleted"  class="preview-window shadow">
+            <div fxLayout="column" fxLayoutAlign="space-around center" *ngIf="!img || isDeleted"  class="preview-window shadow">
                 <mat-spinner *ngIf="loading" diameter="40" ></mat-spinner>
             </div>
             
@@ -75,10 +75,9 @@
     [style.left]="contextMenuPosition.x"
     [style.top]="contextMenuPosition.y" 
     [matMenuTriggerFor]="contextMenu"
-    (contextmenu)="onRightClick($event)" 
     >
 </div>
-<mat-menu #contextMenu="matMenu" (contextmenu)="onRightClick($event)">
+<mat-menu #contextMenu="matMenu">
     <ng-template matMenuContent let-item="row">
         <button 
         mat-menu-item (click)="onContextMenuAction1(clickedRow.values().next().value)"

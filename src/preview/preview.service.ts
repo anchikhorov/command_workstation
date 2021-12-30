@@ -1,18 +1,17 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable, Header, Req, StreamableFile } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { Request} from 'express';
 import { client } from 'davexmlrpc';
+import { Subject, Observable} from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Subject, Observable,Subscription } from 'rxjs';
-// import { Observable } from 'rxjs';
-// import { Subscription } from 'rxjs';
+
 
 @Injectable()
 export class PreviewService {
     private urlEndpoint: string = "http://10.117.124.175/ScanInterface/";
     private format: string = "xml";
     private previewSubject = new Subject();
-    //private previewSub!: Subscription;
+    
     constructor(
         private readonly httpService: HttpService,
     ) { }
@@ -24,14 +23,9 @@ export class PreviewService {
         const loadJobFromSpoolerPromise = () => {
             return new Promise((resolve, reject) => {
                 client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-                    //   console.log(session)
-                    //   console.log(typeof parseInt(jobId))
-                    //   console.log(err)
                     if (err) {
-
                         return reject(err);
                     }
-                    //   console.log(data)
                     resolve(data);
                 });
             });
@@ -48,14 +42,13 @@ export class PreviewService {
                 })
             .pipe(
                 map(response => {
-                    //console.log(response.data)
                     return new StreamableFile(Buffer.from(response.data, 'binary'));
                 })
             )
 
     }
 
-    renderPreview(): Observable<any> {
-        return this.previewSubject.asObservable();
-      }
+    // renderPreview(): Observable<any> {
+    //     return this.previewSubject.asObservable();
+    //   }
 }

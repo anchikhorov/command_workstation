@@ -66,6 +66,16 @@ export class JobsService implements OnDestroy {
     return this.previewPublisher.asObservable();
   }
 
+  
+  deleteJob(id: number) {
+    return this.http.get(
+      `${BACKEND_URL}delete?id=${id}`,
+      {
+        withCredentials: true
+      }
+    )
+  }
+
   ngOnDestroy() {
     this.stopPolling.next(null);
     this.alljobs$.unsubscribe()

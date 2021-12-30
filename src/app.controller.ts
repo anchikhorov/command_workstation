@@ -21,7 +21,7 @@ export class AppController {
             return jobs
           }))));
     }
-    else {
+    if (request.cookies['session']) {
       return this.appService.getAllJobs(request.cookies['session'])
         .then(jobs => {
           return jobs

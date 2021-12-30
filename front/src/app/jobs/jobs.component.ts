@@ -5,6 +5,7 @@ import * as _ from "lodash";
 import { Job } from './job.model';
 import { JobsService } from './jobs.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
+import {CookieService} from 'ngx-cookie-service';
 
 @Component({
   selector: 'app-jobs',
@@ -14,15 +15,18 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 export class JobsComponent implements OnInit, OnDestroy {
   jobs: Job[] = []
   img : SafeUrl | null = null;
+  //cookieValue!: number;
   private jobsSub!: Subscription;
   private previewSub!: Subscription;
   displayedColumns: string[] = ['id', 'jobname', 'user', 'size', 'pages', 'created', 'printer', 'foldprogram', 'state'];
   clickedRow = new Set<PeriodicElement>();
   loading = false
+  isDeleted = true
 
   constructor(
     private jobservise: JobsService,
-    private sanitizer:DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cookieService: CookieService
   ) { }
 
   ngOnInit(): void {
@@ -54,6 +58,17 @@ export class JobsComponent implements OnInit, OnDestroy {
     alert(`Click on Action 2 for ${row.id}`);
   }
 
+  onContextMenuDelete(row: PeriodicElement) {
+    this.jobservise.deleteJob(row.id).subscribe(()=>{
+      this.isDeleted = true
+      this.img = null
+    }
+      
+    )
+    
+    //alert(`Click on Action 2 for ${row.id}`);
+  }
+
   onRowClick(row: PeriodicElement) {
     if(this.previewSub){
       this.previewSub.unsubscribe();
@@ -82,6 +97,7 @@ export class JobsComponent implements OnInit, OnDestroy {
             const unsafeImg = URL.createObjectURL(blob);
             this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
             this.loading = false
+            this.isDeleted = !(this.clickedRow.values().next().value.id == parseInt(this.cookieService.get('id')))
         },
         error: (e: any) => console.error(e),
         complete: () => console.info('complete') 

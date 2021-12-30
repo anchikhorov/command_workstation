@@ -4,12 +4,13 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PreviewController } from './preview/preview.controller';
 import { PreviewService } from './preview/preview.service';
+import { DeleteController } from './delete/delete.controller';
 
 @Module({
   imports: [
     HttpModule,
   ],
-  controllers: [AppController, PreviewController],
+  controllers: [AppController, PreviewController, DeleteController],
   providers: [AppService, PreviewService],
 })
 export class AppModule {}

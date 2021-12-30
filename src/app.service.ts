@@ -27,7 +27,7 @@ export class AppService {
 
   setSessionTimeout(session): Promise<any> {
     let verb: string = "setSessionTimeout";
-    let params: any = [session,1800];
+    let params: any = [session, 1800];
 
     const setSessionTimeoutPromise = () => {
       return new Promise((resolve, reject) => {
@@ -44,20 +44,17 @@ export class AppService {
   }
 
 
-  setPrinter(session): Promise<any> {
+  setPrinter(session: string): Promise<any> {
     let verb: string = "print.setParam";
-    let params: any = [session,"printer","ROWE"];
+    let params: any = [session, "printer", "ROWE"];
 
     const setPrinterPromise = () => {
       return new Promise((resolve, reject) => {
         client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          // console.log(session)
-          // console.log(err)
           if (err) {
-          
+
             return reject(err);
           }
-          // console.log(data)
           resolve(data);
         });
       });
@@ -66,7 +63,7 @@ export class AppService {
   }
 
 
-  getAllJobs(session): Promise<any> {
+  getAllJobs(session: string): Promise<any> {
     let verb: string = "print_admin.getAllJobs";
     let params: any = [session];
 
@@ -83,5 +80,43 @@ export class AppService {
     return getAllJobsPromise()
   }
 
+  deleteJob(session, jobId): Promise<any> {
+    let verb: string = "print_admin.cancelJob";
+    let params: any = [session, parseInt(jobId)];
+
+    const deleteJobPromise = () => {
+      return new Promise((resolve, reject) => {
+        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(data);
+        });
+      });
+    }
+    return deleteJobPromise()
+  }
+
+
+  logon(session): Promise<any> {
+    let verb: string = "logon";
+    let params: any = [session, 'joblistadmin','admin'];
+
+    const deleteJobPromise = () => {
+      return new Promise((resolve, reject) => {
+        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(data);
+        });
+      });
+    }
+    return deleteJobPromise()
+  }
+
+
 }
+
+
 

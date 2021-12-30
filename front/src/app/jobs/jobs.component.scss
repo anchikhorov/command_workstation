@@ -1,3 +1,4 @@
+@use '@angular/material' as mat;
 .table {
     width: 100%;
 
@@ -6,7 +7,7 @@
   .job-table-body{
     //height: 400px;
     max-width: 100%;
-    overflow-y:scroll; 
+    //overflow-y:scroll; 
     //-ms-overflow-style: none;  /* IE and Edge */
     //scrollbar-width: none;  /* Firefox */
 
@@ -39,6 +40,7 @@
 
   .preview-img{
     width: 100%;
+    //@include mat.elevation(2);
   }
 
   .rotateimg180 {
@@ -57,15 +59,18 @@
     border-right: 1px solid white;
   }
   .preview-window{
-     //border: 1px solid white;
-     width: 20em;;
-     height: 10em;
+     border: 1px solid white;
+     width: 100%;
+     height: 250px;
+     //@include mat.elevation(10);
   }
 
-
+.shadow{
+  @include mat.elevation(6);
+}
 /* The container's content you want to add an overflow to */
 .scrollable-content {
-  overflow:scroll; 
+  overflow:auto; 
   overflow-x: hidden;
   //flex-grow: 1;  
   //overflow: auto;

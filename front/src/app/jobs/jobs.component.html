@@ -1,41 +1,25 @@
-<!-- <mat-toolbar color="primary">
-      <button mat-icon-button class="example-icon" aria-label="Example icon-button with menu icon">
-        <mat-icon>menu</mat-icon>
-      </button>
-      <span>My App</span>
-      <span class="example-spacer"></span>
-      <button mat-icon-button class="example-icon favorite-icon" aria-label="Example icon-button with heart icon">
-        <mat-icon>favorite</mat-icon>
-      </button>
-      <button mat-icon-button class="example-icon" aria-label="Example icon-button with share icon">
-        <mat-icon>share</mat-icon>
-      </button>
-</mat-toolbar> -->
 <div class="content" fxLayout="row" fxFlexFill (contextmenu)="onRightClick($event)">
     <div fxFlex="9" class="cockpit">
 
     </div>
-    <div fxFlex="80" class="job-table-body">
+    <div fxFlex="80" class="job-table-body scrollable-content">
         <table mat-table [dataSource]="jobs" class="mat-elevation-z8 table">
-            <!-- Position Column -->
+
             <ng-container matColumnDef="id">
                 <th mat-header-cell *matHeaderCellDef>ID</th>
                 <td mat-cell *matCellDef="let job">{{job.id}}</td>
             </ng-container>
         
-            <!-- Name Column -->
             <ng-container matColumnDef="jobname">
                 <th mat-header-cell *matHeaderCellDef>Job name</th>
                 <td mat-cell *matCellDef="let job">{{job.jobname}}</td>
             </ng-container>
         
-            <!-- Weight Column -->
             <ng-container matColumnDef="user">
                 <th mat-header-cell *matHeaderCellDef>User</th>
                 <td mat-cell *matCellDef="let job">{{job.user}}</td>
             </ng-container>
         
-            <!-- Symbol Column -->
             <ng-container matColumnDef="size">
                 <th mat-header-cell *matHeaderCellDef>Size</th>
                 <td mat-cell *matCellDef="let job">{{job.size}} Mbyte</td>
@@ -77,31 +61,40 @@
             </tr>
         </table>
         </div>
-        <!-- <cdk-virtual-scroll-viewport appendOnly itemSize="250" class="example-viewport">
-
-        </cdk-virtual-scroll-viewport> -->
         <div fxFlex="11" fxLayout="column" fxLayoutAlign="start center" class="job-small-preview scrollable-content">
-            <div fxLayout="column" fxLayoutAlign="space-around center" *ngIf="!img"  class="preview-window">
+            <div fxLayout="column" fxLayoutAlign="space-around center" *ngIf="!img && isDeleted"  class="preview-window shadow">
                 <mat-spinner *ngIf="loading" diameter="40" ></mat-spinner>
             </div>
             
-            <img [src]="img" class="preview-img" *ngIf="!loading" fxLayout="row" fxLayoutAlign="space-around center">
+            <img [src]="img" class="preview-img shadow" *ngIf="!loading && !isDeleted" fxLayout="row" fxLayoutAlign="space-around center">
         </div>
 
 </div>
 
-<div style="visibility: hidden; position: fixed" [style.left]="contextMenuPosition.x"
-    [style.top]="contextMenuPosition.y" [matMenuTriggerFor]="contextMenu">
+<div style="visibility: hidden; position: fixed" 
+    [style.left]="contextMenuPosition.x"
+    [style.top]="contextMenuPosition.y" 
+    [matMenuTriggerFor]="contextMenu"
+    (contextmenu)="onRightClick($event)" 
+    >
 </div>
-<mat-menu #contextMenu="matMenu">
+<mat-menu #contextMenu="matMenu" (contextmenu)="onRightClick($event)">
     <ng-template matMenuContent let-item="row">
         <button 
         mat-menu-item (click)="onContextMenuAction1(clickedRow.values().next().value)"
         (contextmenu)="onRightClick($event)"
-        >Action 1</button>
+        >Preview</button>
         <button 
         mat-menu-item (click)="onContextMenuAction2(clickedRow.values().next().value)"
         (contextmenu)="onRightClick($event)"
-        >Action 2</button>
+        >Properties</button>
+        <button 
+        mat-menu-item (click)="onContextMenuAction1(clickedRow.values().next().value)"
+        (contextmenu)="onRightClick($event)"
+        >Print</button>
+        <button 
+        mat-menu-item (click)="onContextMenuDelete(clickedRow.values().next().value)"
+        (contextmenu)="onRightClick($event)"
+        >Delete</button>
     </ng-template>
 </mat-menu>

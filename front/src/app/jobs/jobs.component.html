@@ -80,20 +80,21 @@
 <mat-menu #contextMenu="matMenu">
     <ng-template matMenuContent let-item="row">
         <button 
-        mat-menu-item (click)="onContextMenuAction1(clickedRow.values().next().value)"
+        mat-menu-item (click)="onContextMenuResume(clickedRow.values().next().value)"
+        (contextmenu)="onRightClick($event)"
+        >Resume</button>
+        <button 
+        mat-menu-item (click)="onContextMenuDelete(clickedRow.values().next().value)"
+        (contextmenu)="onRightClick($event)"
+        >Delete</button>
+        <button 
+        mat-menu-item (click)="onContextMenuPreview(clickedRow.values().next().value)"
         (contextmenu)="onRightClick($event)"
         >Preview</button>
         <button 
         mat-menu-item (click)="onContextMenuAction2(clickedRow.values().next().value)"
         (contextmenu)="onRightClick($event)"
         >Properties</button>
-        <button 
-        mat-menu-item (click)="onContextMenuAction1(clickedRow.values().next().value)"
-        (contextmenu)="onRightClick($event)"
-        >Print</button>
-        <button 
-        mat-menu-item (click)="onContextMenuDelete(clickedRow.values().next().value)"
-        (contextmenu)="onRightClick($event)"
-        >Delete</button>
     </ng-template>
 </mat-menu>
+

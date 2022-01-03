@@ -13,6 +13,7 @@ import {MatListModule} from '@angular/material/list';
 import {MatMenuModule} from '@angular/material/menu';
 import {MatIconModule} from '@angular/material/icon';
 import {ScrollingModule} from '@angular/cdk/scrolling';
+//import {MatDialog} from '@angular/material/dialog'
 
 
 @NgModule({
@@ -30,7 +31,8 @@ import {ScrollingModule} from '@angular/cdk/scrolling';
     MatListModule,
     MatMenuModule,
     MatIconModule,
-    ScrollingModule
+    ScrollingModule,
+    //MatDialog
   ]
 })
 export class AngularMaterialModule {}

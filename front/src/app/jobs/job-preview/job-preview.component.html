@@ -1,0 +1,11 @@
+<mat-dialog-content class="preview-dialog">
+    <div fxLayout="column" fxLayoutAlign="space-around center" *ngIf="!img"  class="preview-window">
+        <mat-spinner *ngIf="loading" diameter="40" ></mat-spinner>
+    </div>
+
+    <img [src]='img'>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Close</button>
+    <!-- <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Install</button> -->
+  </mat-dialog-actions>

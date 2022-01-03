@@ -98,6 +98,24 @@ export class AppService {
   }
 
 
+  resumeJob(session, jobId): Promise<any> {
+    let verb: string = "print_admin.resumeJob";
+    let params: any = [session, parseInt(jobId)];
+
+    const resumeJobPromise = () => {
+      return new Promise((resolve, reject) => {
+        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(data);
+        });
+      });
+    }
+    return resumeJobPromise()
+  }
+
+
   logon(session): Promise<any> {
     let verb: string = "logon";
     let params: any = [session, 'joblistadmin','admin'];

@@ -16,6 +16,7 @@ export class JobsService implements OnDestroy {
   private previewPublisher = new Subject<any>();
   private alljobs$!: Subscription;
   private stopPolling = new Subject();
+  jobId: number = 0
 
   constructor(private http: HttpClient) {
 
@@ -48,7 +49,6 @@ export class JobsService implements OnDestroy {
   }
 
   getPreview(id: number) {
-    //let url = "http://10.117.124.175/ScanInterface/print.getPrintPreview?id=oYFS2mSicj&w=200"
     this.http.get(
       `${BACKEND_URL}preview?id=${id}`,
       {
@@ -70,6 +70,15 @@ export class JobsService implements OnDestroy {
   deleteJob(id: number) {
     return this.http.get(
       `${BACKEND_URL}delete?id=${id}`,
+      {
+        withCredentials: true
+      }
+    )
+  }
+
+  resumeJob(id: number) {
+    return this.http.get(
+      `${BACKEND_URL}resume?id=${id}`,
       {
         withCredentials: true
       }

@@ -6,6 +6,9 @@ import { Job } from './job.model';
 import { JobsService } from './jobs.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import {CookieService} from 'ngx-cookie-service';
+import { MatDialog, MatDialogConfig, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { JobPreviewComponent } from './job-preview/job-preview.component';
+
 
 @Component({
   selector: 'app-jobs',
@@ -26,7 +29,8 @@ export class JobsComponent implements OnInit, OnDestroy {
   constructor(
     private jobservise: JobsService,
     private sanitizer: DomSanitizer,
-    private cookieService: CookieService
+    private cookieService: CookieService,
+    public dialog: MatDialog,
   ) { }
 
   ngOnInit(): void {
@@ -50,24 +54,30 @@ export class JobsComponent implements OnInit, OnDestroy {
     this.contextMenu.openMenu();
   }
 
-  onContextMenuAction1(row: PeriodicElement) {
-    alert(`Click on Action 1 for ${row.id}`);
+  onContextMenuResume(row: PeriodicElement) {
+
+    this.jobservise.resumeJob(row.id)
+    .subscribe(()=> console.log(`job ${row.id} was resumed`))
+  }
+
+  onContextMenuDelete(row: PeriodicElement) {
+    this.jobservise.deleteJob(row.id).subscribe(()=> {
+      this.isDeleted = true
+      this.img = null
+      this.clickedRow.clear();
+      this.loading = false
+      console.log(`job ${row.id} was deleted`)
+    })
+  }
+
+
+  onContextMenuPreview(row: PeriodicElement) {
+    this.openBigPreview(row.id)
+    //alert(`Click on Action 1 for ${row.id}`);
   }
 
   onContextMenuAction2(row: PeriodicElement) {
     alert(`Click on Action 2 for ${row.id}`);
-  }
-
-  onContextMenuDelete(row: PeriodicElement) {
-    this.jobservise.deleteJob(row.id).subscribe(()=>{
-      this.isDeleted = true
-      this.img = null
-      this.clickedRow.clear();
-    }
-      
-    )
-    
-    //alert(`Click on Action 2 for ${row.id}`);
   }
 
   onRowClick(row: PeriodicElement) {
@@ -99,12 +109,25 @@ export class JobsComponent implements OnInit, OnDestroy {
             const unsafeImg = URL.createObjectURL(blob);
             this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
             this.loading = false
-            this.isDeleted = !(this.clickedRow.values().next().value.id == parseInt(this.cookieService.get('id')))
+            if (this.clickedRow.values().next().value.id){
+              this.isDeleted = !(this.clickedRow.values().next().value.id == parseInt(this.cookieService.get('id')))
+            } else {
+              this.isDeleted = true
+            }
+            
         },
         error: (e: any) => console.error(e),
         complete: () => console.info('complete') 
       }
     );
+  }
+
+  openBigPreview(id: number) {
+    this.jobservise.jobId = id
+    const dialogRef = this.dialog.open(JobPreviewComponent);
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+    });
   }
 
   isEqual(row: PeriodicElement){
@@ -132,3 +155,4 @@ export interface PeriodicElement {
   foldprogram: string;
   state: string;
 }
+

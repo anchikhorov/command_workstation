@@ -133,12 +133,6 @@ export class JobsComponent implements OnInit, OnDestroy {
   }
 
   isIdEqual(){
-    // console.log(this.clickedRow.size)
-    console.log(this.clickedRow
-       .values()
-       .next()
-       .value.id)
-    console.log(parseInt(this.cookieService.get('id')))
     if(this.clickedRow.size == 1){
       return this.isRowAndImageIdEqual = (this.clickedRow
         .values()

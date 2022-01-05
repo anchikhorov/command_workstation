@@ -35,8 +35,9 @@ export class PreviewService {
 
     @Header("Content-Type", "image/png")
     getPreview(@Req() request: Request){
+        let size = request.query['isFull'] ? '&w=520' : '&w=200';
         return this.httpService
-            .get(`${this.urlEndpoint}print.getPrintPreview?id=${request.cookies['session']}&w=200`,
+            .get(`${this.urlEndpoint}print.getPrintPreview?id=${request.cookies['session']}${size}`,
                 {
                     responseType: "arraybuffer"
                 })

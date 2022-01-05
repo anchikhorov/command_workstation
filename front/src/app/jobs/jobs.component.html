@@ -56,17 +56,38 @@
             <tr 
                 mat-row (click)="onRowClick(row)" 
                 (contextmenu)="onContextMenu($event, row)"
-                [class.row-is-clicked]="isEqual(row)"
+                [class.row-is-clicked]="isRowsEqual(row)"
                 *matRowDef="let row; columns: displayedColumns;">
             </tr>
         </table>
         </div>
-        <div fxFlex="11" fxLayout="column" fxLayoutAlign="start center" class="job-small-preview scrollable-content">
-            <div fxLayout="column" fxLayoutAlign="space-around center" *ngIf="!img || isDeleted"  class="preview-window shadow">
-                <mat-spinner *ngIf="loading" diameter="40" ></mat-spinner>
+        <div 
+             fxFlex="11" 
+             fxLayout="column" 
+             fxLayoutAlign="start center" 
+             class="job-small-preview scrollable-content">
+
+            <div 
+               fxLayout="column" 
+               fxLayoutAlign="space-around center" 
+               *ngIf="loading || !isRowAndImageIdEqual"  
+               class="preview-window shadow">
+
+               <mat-spinner 
+                  *ngIf="loading" 
+                  diameter="40" >
+               </mat-spinner>
+                
             </div>
-            
-            <img [src]="img" class="preview-img shadow" *ngIf="!loading && !isDeleted" fxLayout="row" fxLayoutAlign="space-around center">
+
+            <img 
+              [src]="img" 
+              *ngIf="!loading && isRowAndImageIdEqual" 
+              class="preview-img shadow" 
+              (load)='isLoaded()' 
+              [className]="loading ? 'hidden' : 'preview-img shadow'" 
+              fxLayout="row" 
+              fxLayoutAlign="space-around center">
         </div>
 
 </div>

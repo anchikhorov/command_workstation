@@ -9,8 +9,6 @@ export class ResumeController {
       ){}
     @Get()
     resumeJob(@Req() request: Request){
-      // console.log("preview request.query['session']", request.cookies['session'])
-      // console.log("preview request.query['id']", request.query['id'])
        const resumeJobPromise = async () => {
             await this.appService.logon(request.cookies['session']);
          return await this.appService.resumeJob(request.cookies['session'], request.query['id']);

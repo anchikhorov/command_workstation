@@ -16,7 +16,7 @@ export class JobsService implements OnDestroy {
   private previewPublisher = new Subject<any>();
   private alljobs$!: Subscription;
   private stopPolling = new Subject();
-  jobId: number = 0
+  jobId!: number;
 
   constructor(private http: HttpClient) {
 
@@ -48,9 +48,9 @@ export class JobsService implements OnDestroy {
     return this.jobsPublisher.asObservable();
   }
 
-  getPreview(id: number) {
+  getPreview(id: number, isFull: boolean) {
     this.http.get(
-      `${BACKEND_URL}preview?id=${id}`,
+      `${BACKEND_URL}preview?id=${id}&isFull=${isFull}`,
       {
         responseType:"arraybuffer",
         withCredentials: true

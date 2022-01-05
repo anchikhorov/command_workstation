@@ -25,6 +25,7 @@ export class JobsComponent implements OnInit, OnDestroy {
   clickedRow = new Set<PeriodicElement>();
   loading = false
   isDeleted = true
+  isRowAndImageIdEqual = false
 
   constructor(
     private jobservise: JobsService,
@@ -62,10 +63,9 @@ export class JobsComponent implements OnInit, OnDestroy {
 
   onContextMenuDelete(row: PeriodicElement) {
     this.jobservise.deleteJob(row.id).subscribe(()=> {
-      this.isDeleted = true
-      this.img = null
       this.clickedRow.clear();
-      this.loading = false
+      this.isIdEqual()
+      this.img = null
       console.log(`job ${row.id} was deleted`)
     })
   }
@@ -73,7 +73,6 @@ export class JobsComponent implements OnInit, OnDestroy {
 
   onContextMenuPreview(row: PeriodicElement) {
     this.openBigPreview(row.id)
-    //alert(`Click on Action 1 for ${row.id}`);
   }
 
   onContextMenuAction2(row: PeriodicElement) {
@@ -85,22 +84,22 @@ export class JobsComponent implements OnInit, OnDestroy {
     if(this.previewSub){
       this.previewSub.unsubscribe();
     }
-    if (!this.isEqual(row)){
-      this.loading = true
+    if (!this.isRowsEqual(row)){
+      console.log(this.isRowsEqual(row))
+      this.clickedRow.clear();
+      this.clickedRow.add(row)
+      this.isIdEqual() 
       this.getPreview(row.id)
     }
 
-    this.clickedRow.clear();
-    this.clickedRow.add(row) 
-    
   }
 
   getPreview(id: number){
-    this.img = null
+    this.loading = true
     if(this.previewSub){
       this.previewSub.unsubscribe()
     }
-    this.jobservise.getPreview(id)
+    this.jobservise.getPreview(id, false)
     this.previewSub = this.jobservise.renderPreview().subscribe(
       {
         next: (value: any) => {
@@ -108,13 +107,8 @@ export class JobsComponent implements OnInit, OnDestroy {
             const blob = new Blob([value], { type: mediaType });
             const unsafeImg = URL.createObjectURL(blob);
             this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
-            this.loading = false
-            if (this.clickedRow.values().next().value.id){
-              this.isDeleted = !(this.clickedRow.values().next().value.id == parseInt(this.cookieService.get('id')))
-            } else {
-              this.isDeleted = true
-            }
-            
+            this.isIdEqual()
+            this.loading = false  
         },
         error: (e: any) => console.error(e),
         complete: () => console.info('complete') 
@@ -123,19 +117,47 @@ export class JobsComponent implements OnInit, OnDestroy {
   }
 
   openBigPreview(id: number) {
-    this.jobservise.jobId = id
+    this.loading = false;
+    this.jobservise.jobId = id;
+    console.log(this.jobservise.jobId);
+    if(this.previewSub){
+      this.previewSub.unsubscribe();
+    }
+    let isFullPreviewPresent: Boolean = this.cookieService.get('isFull') ? Boolean(JSON.parse(this.cookieService.get('isFull'))) : false
+    //this.img = null
     const dialogRef = this.dialog.open(JobPreviewComponent);
     dialogRef.afterClosed().subscribe(result => {
+      !this.isRowAndImageIdEqual && !isFullPreviewPresent ? this.getPreview(id) : this.cookieService.set('isFull',String(isFullPreviewPresent))
       console.log(`Dialog result: ${result}`);
     });
   }
 
-  isEqual(row: PeriodicElement){
+  isIdEqual(){
+    // console.log(this.clickedRow.size)
+    console.log(this.clickedRow
+       .values()
+       .next()
+       .value.id)
+    console.log(parseInt(this.cookieService.get('id')))
+    if(this.clickedRow.size == 1){
+      return this.isRowAndImageIdEqual = (this.clickedRow
+        .values()
+        .next()
+        .value.id == parseInt(this.cookieService.get('id'))) //&& !Boolean(JSON.parse(this.cookieService.get('isFull')))
+    }
+    return this.isRowAndImageIdEqual = false;
+  }
+
+  isRowsEqual(row: PeriodicElement){
     return _.isEqual(this.clickedRow.values().next().value, row)
   }
 
   onRightClick(event: { preventDefault: () => void; }) {
     event.preventDefault();
+  }
+
+  isLoaded(){
+    this.loading = false
   }
 
   ngOnDestroy() {

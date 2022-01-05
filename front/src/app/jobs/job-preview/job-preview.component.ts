@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { Subscription } from 'rxjs';
+import { Subscription} from 'rxjs';
 import { JobsService } from '../jobs.service';
 
 @Component({
@@ -10,7 +10,6 @@ import { JobsService } from '../jobs.service';
 })
 export class JobPreviewComponent implements OnInit {
   img : SafeUrl | null = null;
-  //id!: number;
   private previewSub!: Subscription;
   loading = false
   constructor(
@@ -19,7 +18,6 @@ export class JobPreviewComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    //console.log(this.)
     this.getPreview(this.jobservise.jobId)
   }
 
@@ -30,7 +28,7 @@ export class JobPreviewComponent implements OnInit {
     if(this.previewSub){
       this.previewSub.unsubscribe()
     }
-    this.jobservise.getPreview(id)
+    this.jobservise.getPreview(id,true)
     this.previewSub = this.jobservise.renderPreview().subscribe(
       {
         next: (value: any) => {
@@ -38,19 +36,24 @@ export class JobPreviewComponent implements OnInit {
             const blob = new Blob([value], { type: mediaType });
             const unsafeImg = URL.createObjectURL(blob);
             this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
-            this.loading = false
             
         },
         error: (e: any) => console.error(e),
         complete: () => console.info('complete') 
       }
+      
     );
+  }
+
+  isLoaded(){
+    this.loading = false
   }
 
   ngOnDestroy(){
     if( this.previewSub){
       this.previewSub.unsubscribe();
     }
-    this.jobservise.jobId = 0
+    //this.jobservise.jobId = 0
+    this.img = null
   }
 }

@@ -11,7 +11,8 @@ export class PreviewController {
     ) { }
     @Get()
     getPreview(@Req() request: Request, @Res({ passthrough: true }) response: Response) {
-        response.cookie('id', request.query['id'])
+        response.cookie('id', request.query['id']);
+        response.cookie('isFull',request.query['isFull']);
         const getPreviewPromise = async () => {
             await this.previewService
                 .loadJobFromSpooler(request.cookies['session'], request.query['id']);

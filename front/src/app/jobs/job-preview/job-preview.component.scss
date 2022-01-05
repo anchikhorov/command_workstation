@@ -21,6 +21,10 @@
   .preview-window{
     border: 1px solid white;
     width: 300px;
-    height: 300px;
+    height: 400px;
     //@include mat.elevation(10);
+ }
+
+ .hidden{
+  visibility: hidden;
  }

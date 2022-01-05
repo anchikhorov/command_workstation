@@ -1,9 +1,9 @@
 <mat-dialog-content class="preview-dialog">
-    <div fxLayout="column" fxLayoutAlign="space-around center" *ngIf="!img"  class="preview-window">
+    <div fxLayout="column" fxLayoutAlign="space-around center" *ngIf="loading"  class="preview-window">
         <mat-spinner *ngIf="loading" diameter="40" ></mat-spinner>
     </div>
 
-    <img [src]='img'>
+    <img [src]='img' (load)='isLoaded()' [className]="loading ? 'hidden' : ''">
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Close</button>

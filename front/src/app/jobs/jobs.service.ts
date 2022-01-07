@@ -20,7 +20,7 @@ export class JobsService implements OnDestroy {
 
   constructor(private http: HttpClient) {
 
-    this.alljobs$ = timer(0, 2000)
+    this.alljobs$ = timer(0, 3000)
       .pipe(
 
         switchMap(async () => this.receiveJobs()),

@@ -6,7 +6,7 @@ export class AppService {
   private urlEndpoint: string = "http://10.117.124.175/ScanInterface/";
   private format: string = "xml";
 
-  getSession(): Promise<any> {
+  async getSession(): Promise<any> {
     let verb: string = "open";
     let params: any = ["guest"];
 
@@ -65,7 +65,7 @@ export class AppService {
 
   getAllJobs(session: string): Promise<any> {
     let verb: string = "print_admin.getAllJobs";
-    let params: any = [session];
+    let params: any = [session,'','',10];
 
     const getAllJobsPromise = () => {
       return new Promise((resolve, reject) => {
@@ -120,7 +120,7 @@ export class AppService {
     let verb: string = "logon";
     let params: any = [session, 'joblistadmin','admin'];
 
-    const deleteJobPromise = () => {
+    const logonPromise = () => {
       return new Promise((resolve, reject) => {
         client(this.urlEndpoint, verb, params, this.format, (err, data) => {
           if (err) {
@@ -130,7 +130,30 @@ export class AppService {
         });
       });
     }
-    return deleteJobPromise()
+    return logonPromise()
+  }
+
+
+  setJobProperties(session, jobId): Promise<any> {
+    let verb: string = "call";
+    let paramsArray = [
+      ['scan.saveActiveSetFileOptions'],
+      ['print.startSet', 0],
+      ['print_admin.cancelJob',parseInt(jobId)]
+    ];
+    let params: any = [session,paramsArray];
+
+    const setJobPropertiesPromise = () => {
+      return new Promise((resolve, reject) => {
+        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
+          if (err) {
+            return reject(err);
+          }
+          resolve(data);
+        });
+      });
+    }
+    return setJobPropertiesPromise()
   }
 
 

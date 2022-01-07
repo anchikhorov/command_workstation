@@ -10,24 +10,34 @@ export class AppController {
   ) { }
 
   @Get()
-  getInitialJobs(@Req() request: Request, @Res({ passthrough: true }) response: Response): any {
+  getJobs(@Req() request: Request, @Res({ passthrough: true }) response: Response): any {
     if (!request.cookies['session']) {
-      return this.appService.getSession()
-        .then(session => this.appService.getAllJobs(session)
-          .then(jobs => this.appService.setSessionTimeout(session)
-          .then(() => this.appService.setPrinter(session)
-          .then(() => {
-            response.cookie('session', session)
-            return jobs
-          }))));
+      return this.getInitialJobs(request,response)
     }
     if (request.cookies['session']) {
       return this.appService.getAllJobs(request.cookies['session'])
+      .catch(err => {
+        console.log(err)
+        return this.getInitialJobs(request,response)
+      })
         .then(jobs => {
           return jobs
         })
     }
 
+  }
+
+  getInitialJobs(@Req() request: Request, @Res({ passthrough: true }) response: Response){
+    return this.appService.getSession()
+        .then(session => this.appService.getAllJobs(session)
+          .then(jobs => this.appService.setSessionTimeout(session)
+          .then(() => this.appService.setPrinter(session)
+          .then(() => this.appService.logon(session)
+          .then(() =>{
+            response.cookie('session', session)
+            return jobs
+          })))));
+    
   }
 
 }

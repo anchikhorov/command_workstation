@@ -1,19 +1,21 @@
 import { Controller, Get, Req} from '@nestjs/common';
 import { AppService } from '../app.service';
 import { Request } from 'express';
+import { PreviewService } from 'src/preview/preview.service';
 
 @Controller('delete')
 export class DeleteController {
     constructor(
         private readonly appService: AppService,
+        private readonly previewService: PreviewService
       ){}
     @Get()
     deleteJob(@Req() request: Request){
-      // console.log("preview request.query['session']", request.cookies['session'])
-      // console.log("preview request.query['id']", request.query['id'])
        const deleteJobPromise = async () => {
-            await this.appService.logon(request.cookies['session']);
-         return await this.appService.deleteJob(request.cookies['session'], request.query['id']);
+         return await this.previewService
+         .loadJobFromSpooler(request.cookies['session'], request.query['id'])
+         .then(() => this.appService
+         .deleteJob(request.cookies['session'], request.query['id']))
        }
 
        return deleteJobPromise()

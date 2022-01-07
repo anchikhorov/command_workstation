@@ -5,8 +5,8 @@ import * as _ from "lodash";
 import { Job } from './job.model';
 import { JobsService } from './jobs.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import {CookieService} from 'ngx-cookie-service';
-import { MatDialog, MatDialogConfig, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { CookieService } from 'ngx-cookie-service';
+import { MatDialog } from '@angular/material/dialog';
 import { JobPreviewComponent } from './job-preview/job-preview.component';
 
 
@@ -16,9 +16,10 @@ import { JobPreviewComponent } from './job-preview/job-preview.component';
   styleUrls: ['./jobs.component.scss']
 })
 export class JobsComponent implements OnInit, OnDestroy {
-  jobs: Job[] = []
-  img : SafeUrl | null = null;
-  //cookieValue!: number;
+  //images = new Set<PreviewImage>();
+  map = new Map();
+  jobs: Job[] = [];
+  img: SafeUrl | null = null;
   private jobsSub!: Subscription;
   private previewSub!: Subscription;
   displayedColumns: string[] = ['id', 'jobname', 'user', 'size', 'pages', 'created', 'printer', 'foldprogram', 'state'];
@@ -35,11 +36,11 @@ export class JobsComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-     this.jobsSub = this.jobservise.renderJobs().subscribe(jobs => {
+    this.jobsSub = this.jobservise.renderJobs().subscribe(jobs => {
       this.jobs = jobs
     })
   }
-  
+
 
   @ViewChild(MatMenuTrigger)
   contextMenu!: MatMenuTrigger;
@@ -58,11 +59,11 @@ export class JobsComponent implements OnInit, OnDestroy {
   onContextMenuResume(row: PeriodicElement) {
 
     this.jobservise.resumeJob(row.id)
-    .subscribe(()=> console.log(`job ${row.id} was resumed`))
+      .subscribe(() => console.log(`job ${row.id} was resumed`))
   }
 
   onContextMenuDelete(row: PeriodicElement) {
-    this.jobservise.deleteJob(row.id).subscribe(()=> {
+    this.jobservise.deleteJob(row.id).subscribe(() => {
       this.clickedRow.clear();
       this.isIdEqual()
       this.img = null
@@ -80,38 +81,70 @@ export class JobsComponent implements OnInit, OnDestroy {
   }
 
   onRowClick(row: PeriodicElement) {
-    
-    if(this.previewSub){
+
+    if (this.previewSub) {
       this.previewSub.unsubscribe();
     }
-    if (!this.isRowsEqual(row)){
+    if (!this.isRowsEqual(row)) {
       console.log(this.isRowsEqual(row))
       this.clickedRow.clear();
       this.clickedRow.add(row)
-      this.isIdEqual() 
-      this.getPreview(row.id)
+      this.isIdEqual()
+      //console.log(id)
+      if (this.map.get(row.id)) {
+        this.img = this.map.get(row.id)
+        this.loading = false
+        this.isRowAndImageIdEqual = true
+      } else {
+        this.getPreview(row.id)
+      }
     }
-
   }
 
-  getPreview(id: number){
+  getPreview(id: number) {
     this.loading = true
-    if(this.previewSub){
+    if (this.previewSub) {
       this.previewSub.unsubscribe()
     }
     this.jobservise.getPreview(id, false)
     this.previewSub = this.jobservise.renderPreview().subscribe(
       {
         next: (value: any) => {
-            const mediaType = 'image/png';
-            const blob = new Blob([value], { type: mediaType });
-            const unsafeImg = URL.createObjectURL(blob);
-            this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
-            this.isIdEqual()
-            this.loading = false  
+          const mediaType = 'image/png';
+          const blob = new Blob([value], { type: mediaType });
+          const unsafeImg = URL.createObjectURL(blob);
+          this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
+          this.isIdEqual()
+          this.loading = false
+          this.loading = true
+          if (this.previewSub) {
+            this.previewSub.unsubscribe()
+          }
+          this.jobservise.getPreview(id, false)
+          this.previewSub = this.jobservise.renderPreview().subscribe(
+            {
+              next: (value: any) => {
+                const mediaType = 'image/png';
+                const blob = new Blob([value], { type: mediaType });
+                const unsafeImg = URL.createObjectURL(blob);
+                this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
+                this.isIdEqual()
+                this.loading = false
+                const reader = new FileReader()
+                reader.readAsDataURL(blob)
+                reader.addEventListener('load', () => {
+                  this.map.set(id, reader.result)
+                })
+
+              },
+              error: (e: any) => console.error(e),
+              complete: () => console.info('complete')
+            }
+          );
+
         },
         error: (e: any) => console.error(e),
-        complete: () => console.info('complete') 
+        complete: () => console.info('complete')
       }
     );
   }
@@ -120,20 +153,20 @@ export class JobsComponent implements OnInit, OnDestroy {
     this.loading = false;
     this.jobservise.jobId = id;
     console.log(this.jobservise.jobId);
-    if(this.previewSub){
+    if (this.previewSub) {
       this.previewSub.unsubscribe();
     }
     let isFullPreviewPresent: Boolean = this.cookieService.get('isFull') ? Boolean(JSON.parse(this.cookieService.get('isFull'))) : false
     //this.img = null
     const dialogRef = this.dialog.open(JobPreviewComponent);
     dialogRef.afterClosed().subscribe(result => {
-      !this.isRowAndImageIdEqual && !isFullPreviewPresent ? this.getPreview(id) : this.cookieService.set('isFull',String(isFullPreviewPresent))
+      !this.isRowAndImageIdEqual && !isFullPreviewPresent ? this.getPreview(id) : this.cookieService.set('isFull', String(isFullPreviewPresent))
       console.log(`Dialog result: ${result}`);
     });
   }
 
-  isIdEqual(){
-    if(this.clickedRow.size == 1){
+  isIdEqual() {
+    if (this.clickedRow.size == 1) {
       return this.isRowAndImageIdEqual = (this.clickedRow
         .values()
         .next()
@@ -142,7 +175,7 @@ export class JobsComponent implements OnInit, OnDestroy {
     return this.isRowAndImageIdEqual = false;
   }
 
-  isRowsEqual(row: PeriodicElement){
+  isRowsEqual(row: PeriodicElement) {
     return _.isEqual(this.clickedRow.values().next().value, row)
   }
 
@@ -150,7 +183,7 @@ export class JobsComponent implements OnInit, OnDestroy {
     event.preventDefault();
   }
 
-  isLoaded(){
+  isLoaded() {
     this.loading = false
   }
 
@@ -171,4 +204,9 @@ export interface PeriodicElement {
   foldprogram: string;
   state: string;
 }
+
+// export interface PreviewImage{
+//   id: number;
+//   imageDataUrl: string;
+// }
 

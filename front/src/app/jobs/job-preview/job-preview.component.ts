@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Subscription} from 'rxjs';
+import { WebSocketService } from '../../web-socket.service';
 import { JobsService } from '../jobs.service';
 
 @Component({
@@ -15,35 +16,46 @@ export class JobPreviewComponent implements OnInit {
   constructor(
     private jobservise: JobsService,
     private sanitizer: DomSanitizer,
+    private webSocketService: WebSocketService
   ) { }
 
   ngOnInit(): void {
-    this.getPreview(this.jobservise.jobId)
+    this.loading = this.jobservise.loading
+    this.webSocketService.listen('preview').subscribe(response =>{
+      let data = JSON.parse(String(response))
+      this.img = this.sanitizer.bypassSecurityTrustUrl(data['dataUrl']);
+      this.jobservise.loading = false
+      this.loading = this.jobservise.loading
+      //this.isRowAndImageIdEqual = true
+      this.jobservise.fullPreviewImages.set(data['jobid'], data['dataUrl'])
+
+    })
+    //this.getPreview(this.jobservise.jobId)
   }
 
 
-  getPreview(id: number){
-    this.loading = true
-    this.img = null
-    if(this.previewSub){
-      this.previewSub.unsubscribe()
-    }
-    this.jobservise.getPreview(id,true)
-    this.previewSub = this.jobservise.renderPreview().subscribe(
-      {
-        next: (value: any) => {
-            const mediaType = 'image/png';
-            const blob = new Blob([value], { type: mediaType });
-            const unsafeImg = URL.createObjectURL(blob);
-            this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
+  // getPreview(id: number){
+  //   this.loading = true
+  //   this.img = null
+  //   if(this.previewSub){
+  //     this.previewSub.unsubscribe()
+  //   }
+  //   this.jobservise.getPreview(id,true)
+  //   this.previewSub = this.jobservise.renderPreview().subscribe(
+  //     {
+  //       next: (value: any) => {
+  //           const mediaType = 'image/png';
+  //           const blob = new Blob([value], { type: mediaType });
+  //           const unsafeImg = URL.createObjectURL(blob);
+  //           this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
             
-        },
-        error: (e: any) => console.error(e),
-        complete: () => console.info('complete') 
-      }
+  //       },
+  //       error: (e: any) => console.error(e),
+  //       complete: () => console.info('complete') 
+  //     }
       
-    );
-  }
+  //   );
+  // }
 
   isLoaded(){
     this.loading = false

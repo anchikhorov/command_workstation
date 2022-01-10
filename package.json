@@ -33,10 +33,12 @@
     "@types/socket.io": "^3.0.2",
     "axios": "^0.24.0",
     "b64-to-blob": "^1.2.19",
+    "buffer-to-data-url": "^1.0.0",
     "concurrently": "^6.5.1",
     "cookie-parser": "^1.4.6",
     "g": "^2.0.1",
     "mime": "^3.0.0",
+    "moment": "^2.29.1",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0"

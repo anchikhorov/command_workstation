@@ -11,6 +11,9 @@ const BACKEND_URL: string = "http://localhost:3000/"
   providedIn: 'root'
 })
 export class JobsService implements OnDestroy {
+  smallPreviewImages = new Map();
+  fullPreviewImages = new Map();
+  loading = false
   private jobs: Job[] = []
   private jobsPublisher: Subject<Job[]> = new Subject<Job[]>();
   private previewPublisher = new Subject<any>();

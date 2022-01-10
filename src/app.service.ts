@@ -3,9 +3,11 @@ import { HttpService } from '@nestjs/axios';
 import { Request } from 'express';
 import { client } from 'davexmlrpc';
 import { Subject, timer } from 'rxjs';
-import { map, switchMap, takeUntil, repeatWhen} from 'rxjs/operators';
+import { map, switchMap, takeUntil, repeatWhen } from 'rxjs/operators';
 import { Subscription, from } from 'rxjs';
 import { AppGateway } from './app.gateway';
+import bufferToDataUrl from "buffer-to-data-url"
+import * as moment from 'moment';
 
 @Injectable()
 export class AppService implements OnModuleDestroy {
@@ -18,19 +20,31 @@ export class AppService implements OnModuleDestroy {
   constructor(
     private readonly httpService: HttpService,
     @Inject(forwardRef(() => AppGateway)) private wsGateway: AppGateway,
-    ) {
+  ) {
 
   }
 
-  polling(session: string){
-       this.alljobs$ = timer(0, 3000)
+  polling(session: string) {
+    this.alljobs$ = timer(0, 3000)
       .pipe(
-        switchMap(async () => from(this.getAllJobs(session)).subscribe(
+        switchMap(async () => from(this.getAllJobs(session)).pipe(
+          map(jobs => {
+            return jobs.map(job => {
+              job.created = moment(parseFloat(job.created) * 1000).format('DD.MM.YYYY, HH:mm:ss')
+              job.size = parseFloat((job.size / 1048576).toFixed(2))
+              return job
+            })
+          })
+        )
+        .subscribe(
           {
-          next: (jobs: any) => this.wsGateway.wss.emit('msgToClient', JSON.stringify(jobs)),
-          error: (e: any) => console.error(e),
-          complete: () => console.info('complete')
-        })),
+            next: (jobs: any) => {
+              //this.wsGateway.wss.
+              this.wsGateway.wss.emit('jobs', JSON.stringify(jobs))
+            },
+            error: (e: any) => console.error(e),
+            complete: () => console.info('complete')
+          })),
         takeUntil(this._stopPolling),
         repeatWhen(() => this._startPolling)
       )
@@ -128,6 +142,7 @@ export class AppService implements OnModuleDestroy {
           if (err) {
             return reject(err);
           }
+          //console.log("delete data", data)
           resolve(data);
         });
       });
@@ -197,7 +212,8 @@ export class AppService implements OnModuleDestroy {
   loadJobFromSpooler(session, jobId): Promise<any> {
     let verb: string = "print.loadJobFromSpooler";
     let params: any = [session, parseInt(jobId)];
-
+    console.log('session', session)
+    console.log('jobId', jobId)
     const loadJobFromSpoolerPromise = () => {
       return new Promise((resolve, reject) => {
         client(this.urlEndpoint, verb, params, this.format, (err, data) => {
@@ -212,16 +228,27 @@ export class AppService implements OnModuleDestroy {
   }
 
   @Header("Content-Type", "image/png")
-  getPreview(@Req() request: Request) {
-    let size = request.query['isFull'] ? '&w=520' : '&w=200';
+  //getPreview(@Req() request: Request) {
+  getPreview(request: any) {
+    console.log('getPriview', request)
+    let size = request['isFull'] ? '&w=520' : '&w=200';
     return this.httpService
-      .get(`${this.urlEndpoint}print.getPrintPreview?id=${request.cookies['session']}${size}`,
+      //.get(`${this.urlEndpoint}print.getPrintPreview?id=${request.cookies['session']}${size}`,
+      .get(`${this.urlEndpoint}print.getPrintPreview?id=${request['session']}${size}`,
         {
           responseType: "arraybuffer"
+          //responseType: "json"
         })
       .pipe(
         map(response => {
-          return new StreamableFile(Buffer.from(response.data, 'binary'));
+          let data = {
+            jobid: null,
+            dataUrl: null
+          }
+          data['jobid'] = request['jobid'],
+          data['dataUrl'] = bufferToDataUrl("image/png", Buffer.from(response.data))
+          return data
+
         })
       )
 

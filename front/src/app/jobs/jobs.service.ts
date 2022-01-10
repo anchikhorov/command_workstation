@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient} from "@angular/common/http";
 import { Observable, timer, Subscription, Subject } from "rxjs";
-import { map, switchMap, takeUntil } from 'rxjs/operators';
+import { map, repeatWhen, switchMap, takeUntil } from 'rxjs/operators';
 import { Job } from "./job.model"
 import * as moment from 'moment';
 
@@ -15,17 +15,18 @@ export class JobsService implements OnDestroy {
   private jobsPublisher: Subject<Job[]> = new Subject<Job[]>();
   private previewPublisher = new Subject<any>();
   private alljobs$!: Subscription;
-  private stopPolling = new Subject();
+  private _stopPolling = new Subject<void>();
+  private _startPolling = new Subject<void>();
   jobId!: number;
 
   constructor(private http: HttpClient) {
 
-    this.alljobs$ = timer(0, 3000)
-      .pipe(
-
-        switchMap(async () => this.receiveJobs()),
-        takeUntil(this.stopPolling)
-      ).subscribe()
+    // this.alljobs$ = timer(0, 3000)
+    //   .pipe(
+    //     switchMap(async () => this.receiveJobs()),
+    //     takeUntil(this._stopPolling),
+    //     repeatWhen(() => this._startPolling)
+    //   ).subscribe()
   }
 
 
@@ -42,6 +43,14 @@ export class JobsService implements OnDestroy {
       .subscribe(response => {
         this.jobsPublisher.next(response);
       });
+  }
+
+  startPolling(): void {
+    this._startPolling.next();
+  }
+
+  stopPolling(): void {
+    this._stopPolling.next();
   }
 
   renderJobs(): Observable<Job[]> {
@@ -86,7 +95,7 @@ export class JobsService implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.stopPolling.next(null);
+    this._stopPolling.next();
     this.alljobs$.unsubscribe()
   }
 }

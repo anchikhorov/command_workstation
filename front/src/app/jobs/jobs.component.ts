@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { Subscription } from 'rxjs';
 import * as _ from "lodash";
@@ -8,6 +8,7 @@ import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CookieService } from 'ngx-cookie-service';
 import { MatDialog } from '@angular/material/dialog';
 import { JobPreviewComponent } from './job-preview/job-preview.component';
+import { WebSocketService } from '../web-socket.service';
 
 
 @Component({
@@ -16,8 +17,7 @@ import { JobPreviewComponent } from './job-preview/job-preview.component';
   styleUrls: ['./jobs.component.scss']
 })
 export class JobsComponent implements OnInit, OnDestroy {
-  //images = new Set<PreviewImage>();
-  map = new Map();
+  smallPreviewImages = new Map();
   jobs: Job[] = [];
   img: SafeUrl | null = null;
   private jobsSub!: Subscription;
@@ -27,17 +27,28 @@ export class JobsComponent implements OnInit, OnDestroy {
   loading = false
   isDeleted = true
   isRowAndImageIdEqual = false
+  session: string = ''
 
   constructor(
     private jobservise: JobsService,
     private sanitizer: DomSanitizer,
     private cookieService: CookieService,
     public dialog: MatDialog,
+    private webSocketService: WebSocketService
   ) { }
 
   ngOnInit(): void {
-    this.jobsSub = this.jobservise.renderJobs().subscribe(jobs => {
-      this.jobs = jobs
+    // this.jobsSub = this.jobservise.renderJobs().subscribe(jobs => {
+    //   this.jobs = jobs
+    // })
+    this.webSocketService.listen('msgToClient').subscribe(data =>{
+      //console.log(data)
+      this.jobs = JSON.parse(String(data))
+    })
+    this.webSocketService.listen('session').subscribe(data =>{
+      //console.log(data)
+      this.session = String(data)
+      console.log(this.session)
     })
   }
 
@@ -57,7 +68,6 @@ export class JobsComponent implements OnInit, OnDestroy {
   }
 
   onContextMenuResume(row: PeriodicElement) {
-
     this.jobservise.resumeJob(row.id)
       .subscribe(() => console.log(`job ${row.id} was resumed`))
   }
@@ -67,6 +77,7 @@ export class JobsComponent implements OnInit, OnDestroy {
       this.clickedRow.clear();
       this.isIdEqual()
       this.img = null
+      this.smallPreviewImages.delete(row.id)
       console.log(`job ${row.id} was deleted`)
     })
   }
@@ -90,9 +101,8 @@ export class JobsComponent implements OnInit, OnDestroy {
       this.clickedRow.clear();
       this.clickedRow.add(row)
       this.isIdEqual()
-      //console.log(id)
-      if (this.map.get(row.id)) {
-        this.img = this.map.get(row.id)
+      if (this.smallPreviewImages.get(row.id)) {
+        this.img = this.smallPreviewImages.get(row.id)
         this.loading = false
         this.isRowAndImageIdEqual = true
       } else {
@@ -116,38 +126,20 @@ export class JobsComponent implements OnInit, OnDestroy {
           this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
           this.isIdEqual()
           this.loading = false
-          this.loading = true
-          if (this.previewSub) {
-            this.previewSub.unsubscribe()
-          }
-          this.jobservise.getPreview(id, false)
-          this.previewSub = this.jobservise.renderPreview().subscribe(
-            {
-              next: (value: any) => {
-                const mediaType = 'image/png';
-                const blob = new Blob([value], { type: mediaType });
-                const unsafeImg = URL.createObjectURL(blob);
-                this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
-                this.isIdEqual()
-                this.loading = false
-                const reader = new FileReader()
-                reader.readAsDataURL(blob)
-                reader.addEventListener('load', () => {
-                  this.map.set(id, reader.result)
-                })
-
-              },
-              error: (e: any) => console.error(e),
-              complete: () => console.info('complete')
-            }
-          );
+          const reader = new FileReader()
+          reader.readAsDataURL(blob)
+          reader.addEventListener('load', () => {
+            this.smallPreviewImages.set(id, reader.result)
+          })
 
         },
         error: (e: any) => console.error(e),
         complete: () => console.info('complete')
       }
     );
+
   }
+
 
   openBigPreview(id: number) {
     this.loading = false;
@@ -156,11 +148,13 @@ export class JobsComponent implements OnInit, OnDestroy {
     if (this.previewSub) {
       this.previewSub.unsubscribe();
     }
-    let isFullPreviewPresent: Boolean = this.cookieService.get('isFull') ? Boolean(JSON.parse(this.cookieService.get('isFull'))) : false
-    //this.img = null
+    let isFullPreviewPresent: Boolean = this.cookieService
+      .get('isFull') ? Boolean(JSON.parse(this.cookieService
+        .get('isFull'))) : false
     const dialogRef = this.dialog.open(JobPreviewComponent);
     dialogRef.afterClosed().subscribe(result => {
-      !this.isRowAndImageIdEqual && !isFullPreviewPresent ? this.getPreview(id) : this.cookieService.set('isFull', String(isFullPreviewPresent))
+      !this.isRowAndImageIdEqual && !isFullPreviewPresent ? this.getPreview(id) : this.cookieService
+        .set('isFull', String(isFullPreviewPresent))
       console.log(`Dialog result: ${result}`);
     });
   }
@@ -170,7 +164,7 @@ export class JobsComponent implements OnInit, OnDestroy {
       return this.isRowAndImageIdEqual = (this.clickedRow
         .values()
         .next()
-        .value.id == parseInt(this.cookieService.get('id'))) //&& !Boolean(JSON.parse(this.cookieService.get('isFull')))
+        .value.id == parseInt(this.cookieService.get('id')))
     }
     return this.isRowAndImageIdEqual = false;
   }
@@ -205,8 +199,4 @@ export interface PeriodicElement {
   state: string;
 }
 
-// export interface PreviewImage{
-//   id: number;
-//   imageDataUrl: string;
-// }
 

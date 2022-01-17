@@ -9,6 +9,11 @@
                 <th mat-header-cell *matHeaderCellDef>ID</th>
                 <td mat-cell *matCellDef="let job">{{job.id}}</td>
             </ng-container>
+
+            <ng-container matColumnDef="baseId">
+                <th mat-header-cell *matHeaderCellDef>BaseID</th>
+                <td mat-cell *matCellDef="let job">{{job.baseId ? job.baseId : job.id}}</td>
+            </ng-container>
         
             <ng-container matColumnDef="jobname">
                 <th mat-header-cell *matHeaderCellDef>Job name</th>

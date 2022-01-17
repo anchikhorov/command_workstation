@@ -1,6 +1,5 @@
-import { Injectable, Header, Req, StreamableFile, OnModuleDestroy, Inject, forwardRef } from '@nestjs/common';
+import { Injectable, Header, OnModuleDestroy, Inject, forwardRef } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { Request } from 'express';
 import { client } from 'davexmlrpc';
 import { Subject, timer } from 'rxjs';
 import { map, switchMap, takeUntil, repeatWhen } from 'rxjs/operators';
@@ -11,117 +10,23 @@ import * as moment from 'moment';
 
 @Injectable()
 export class AppService implements OnModuleDestroy {
-  private urlEndpoint: string = "http://10.117.124.175/ScanInterface/";
+  //private urlEndpoint: string = "http://10.117.124.175/ScanInterface/";
+  private urlEndpoint: string = "http://192.168.182.128/ScanInterface/";
   private format: string = "xml";
   private _stopPolling = new Subject<void>();
   private _startPolling = new Subject<void>();
-  private alljobs$!: Subscription;
+  alljobs$?: Subscription;
+
 
   constructor(
     private readonly httpService: HttpService,
     @Inject(forwardRef(() => AppGateway)) private wsGateway: AppGateway,
-  ) {
+  ) { }
 
-  }
-
-  polling(session: string) {
-    this.alljobs$ = timer(0, 3000)
-      .pipe(
-        switchMap(async () => from(this.getAllJobs(session)).pipe(
-          map(jobs => {
-            return jobs.map(job => {
-              job.created = moment(parseFloat(job.created) * 1000).format('DD.MM.YYYY, HH:mm:ss')
-              job.size = parseFloat((job.size / 1048576).toFixed(2))
-              return job
-            })
-          })
-        )
-        .subscribe(
-          {
-            next: (jobs: any) => {
-              //this.wsGateway.wss.
-              this.wsGateway.wss.emit('jobs', JSON.stringify(jobs))
-            },
-            error: (e: any) => console.error(e),
-            complete: () => console.info('complete')
-          })),
-        takeUntil(this._stopPolling),
-        repeatWhen(() => this._startPolling)
-      )
-      .subscribe()
-  }
-
-  startPolling(): void {
-    this._startPolling.next();
-  }
-  stopPolling(): void {
-    this._stopPolling.next();
-  }
-
-  async getSession(): Promise<any> {
-    let verb: string = "open";
-    let params: any = ["guest"];
-
-    const getSessionPromise = () => {
-      return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          if (err) {
-            return reject(err);
-          }
-
-          resolve(data);
-        });
-      });
-    }
-    return getSessionPromise()
-  }
-
-
-  setSessionTimeout(session): Promise<any> {
-    let verb: string = "setSessionTimeout";
-    let params: any = [session, 1800];
-
-    const setSessionTimeoutPromise = () => {
-      return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          if (err) {
-            return reject(err);
-          }
-
-          resolve(data);
-        });
-      });
-    }
-    return setSessionTimeoutPromise()
-  }
-
-
-  setPrinter(session: string): Promise<any> {
-    let verb: string = "print.setParam";
-    let params: any = [session, "printer", "ROWE"];
-
-    const setPrinterPromise = () => {
-      return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          if (err) {
-
-            return reject(err);
-          }
-          resolve(data);
-        });
-      });
-    }
-    return setPrinterPromise()
-  }
-
-
-  getAllJobs(session: string): Promise<any> {
-    let verb: string = "print_admin.getAllJobs";
-    let params: any = [session, '', '', 10];
-
+  xmlrpcRequest(method: string, params?: any[]): Promise<any> {
     const getAllJobsPromise = () => {
       return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
+        client(this.urlEndpoint, method, params, this.format, (err, data) => {
           if (err) {
             return reject(err);
           }
@@ -132,99 +37,117 @@ export class AppService implements OnModuleDestroy {
     return getAllJobsPromise()
   }
 
-  deleteJob(session, jobId): Promise<any> {
-    let verb: string = "print_admin.cancelJob";
-    let params: any = [session, parseInt(jobId)];
 
-    const deleteJobPromise = () => {
-      return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          if (err) {
-            return reject(err);
-          }
-          //console.log("delete data", data)
-          resolve(data);
-        });
-      });
-    }
-    return deleteJobPromise()
+  polling(session: string) {
+    this.alljobs$ = timer(0, 5000)
+      .pipe(
+        switchMap(async () => from(this.xmlrpcRequest("print_admin.getAllJobs", [session, '', '', 10])
+          .catch((err) => {
+            console.log(err)
+            this.stopPolling()
+          })
+        ).pipe(
+          map(jobs => {
+            return jobs.map(async (job: any) => {
+              await this.xmlrpcRequest('call', [session, [['print.loadJobFromSpooler', job.id], ["print.getParam", "jobinfo1"]]])
+                .catch(err => console.log(err))
+                .then((data) => {
+                    job.baseId = parseInt(data[1].value)
+                })
+                .finally(() => {
+                  job.created = moment(parseFloat(job.created) * 1000).format('DD.MM.YYYY, HH:mm:ss')
+                  job.size = parseFloat((job.size / 1048576).toFixed(2))
+                  return job
+                })
+
+              //job.created = moment(parseFloat(job.created) * 1000).format('DD.MM.YYYY, HH:mm:ss')
+              //job.size = parseFloat((job.size / 1048576).toFixed(2))
+              //console.log(job)
+              return job
+            })
+          })
+        )
+          .subscribe(
+            {
+              next: (jobs: any) => {
+                //console.log(jobs)
+                try{
+                  Promise.all(jobs)
+                  .catch(err => {return})
+                  .then((jobs: any[]) => {
+                    let sortedjobs: any[]
+                    if(jobs){
+                      sortedjobs = jobs.sort(this.sortWithBaseId)
+                      this.wsGateway.wss.emit('jobs', JSON.stringify(sortedjobs))
+                    }
+
+                  })
+                }
+                catch{
+                   console.log("catch worked")
+                }
+
+                //this.wsGateway.wss.emit('jobs', JSON.stringify(jobs))
+              },
+              error: (e: any) => console.error(e),
+              complete: () => null//console.info('Job send complete.')
+            })),
+        takeUntil(this._stopPolling),
+        repeatWhen(() => this._startPolling)
+      )
+      .subscribe()
   }
 
+  sortWithBaseId(a: any, b: any){
+      if(a.baseId && !b.baseId){
+        if(a.baseId > b.id){
+          return 1
+        }
 
-  resumeJob(session, jobId): Promise<any> {
-    let verb: string = "print_admin.resumeJob";
-    let params: any = [session, parseInt(jobId)];
+        if (a.baseId < b.id) {
+          return -1
+        }
 
-    const resumeJobPromise = () => {
-      return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(data);
-        });
-      });
-    }
-    return resumeJobPromise()
+      }
+      if ( !a.baseId && b.baseId) { 
+        if(a.id > b.baseId){
+          return 1
+        }
+
+        if (a.id < b.baseId) {
+          return -1
+        }
+      }
+
+      if (a.baseId && b.baseId ) {
+        if(a.baseId > b.baseId){
+          return 1
+        }
+
+        if (a.baseId < b.baseId) {
+          return -1
+        }
+      }
+
+      if (!a.baseId && !b.baseId ) {
+        if(a.id > b.id){
+          return 1
+        }
+
+        if (a.id < b.id) {
+          return -1
+        }
+      }
+      
+        return 0
+
   }
 
-
-  logon(session): Promise<any> {
-    let verb: string = "logon";
-    let params: any = [session, 'joblistadmin', 'admin'];
-
-    const logonPromise = () => {
-      return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(data);
-        });
-      });
-    }
-    return logonPromise()
+  startPolling(): void {
+    this._startPolling.next();
   }
-
-
-  setJobProperties(session, jobId): Promise<any> {
-    let verb: string = "call";
-    let paramsArray = [
-      ['scan.saveActiveSetFileOptions'],
-      ['print.startSet', 0],
-      ['print_admin.cancelJob', parseInt(jobId)]
-    ];
-    let params: any = [session, paramsArray];
-
-    const setJobPropertiesPromise = () => {
-      return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(data);
-        });
-      });
-    }
-    return setJobPropertiesPromise()
-  }
-
-  loadJobFromSpooler(session, jobId): Promise<any> {
-    let verb: string = "print.loadJobFromSpooler";
-    let params: any = [session, parseInt(jobId)];
-    console.log('session', session)
-    console.log('jobId', jobId)
-    const loadJobFromSpoolerPromise = () => {
-      return new Promise((resolve, reject) => {
-        client(this.urlEndpoint, verb, params, this.format, (err, data) => {
-          if (err) {
-            return reject(err);
-          }
-          resolve(data);
-        });
-      });
-    }
-    return loadJobFromSpoolerPromise()
+  stopPolling(): void {
+    this._stopPolling.next();
   }
 
   @Header("Content-Type", "image/png")
@@ -233,11 +156,15 @@ export class AppService implements OnModuleDestroy {
     console.log('getPriview', request)
     let size = request['isFull'] ? '&w=520' : '&w=200';
     return this.httpService
-      //.get(`${this.urlEndpoint}print.getPrintPreview?id=${request.cookies['session']}${size}`,
-      .get(`${this.urlEndpoint}print.getPrintPreview?id=${request['session']}${size}`,
+      //.get(`${this.urlEndpoint}print.getPrintPreview?id=${request['session']}${size}`,
+      .get(this.urlEndpoint +
+        'image.getFilteredData?id=' +
+        request['session'] +
+        '&x=0&y=0&w=0&h=0&w_out=600&highquality=0&set_filters_from_printparams=0&index=' +
+        request['jobid'] +
+        (new Date().getTime()),
         {
           responseType: "arraybuffer"
-          //responseType: "json"
         })
       .pipe(
         map(response => {
@@ -246,7 +173,7 @@ export class AppService implements OnModuleDestroy {
             dataUrl: null
           }
           data['jobid'] = request['jobid'],
-          data['dataUrl'] = bufferToDataUrl("image/png", Buffer.from(response.data))
+            data['dataUrl'] = bufferToDataUrl("image/png", Buffer.from(response.data))
           return data
 
         })

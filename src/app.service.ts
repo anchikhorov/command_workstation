@@ -10,8 +10,8 @@ import * as moment from 'moment';
 
 @Injectable()
 export class AppService implements OnModuleDestroy {
-  //private urlEndpoint: string = "http://10.117.124.175/ScanInterface/";
-  private urlEndpoint: string = "http://192.168.182.128/ScanInterface/";
+  private urlEndpoint: string = "http://10.117.124.175/ScanInterface/";
+  //private urlEndpoint: string = "http://192.168.182.128/ScanInterface/";
   private format: string = "xml";
   private _stopPolling = new Subject<void>();
   private _startPolling = new Subject<void>();
@@ -39,7 +39,7 @@ export class AppService implements OnModuleDestroy {
 
 
   polling(session: string) {
-    this.alljobs$ = timer(0, 5000)
+    this.alljobs$ = timer(0, 10000)
       .pipe(
         switchMap(async () => from(this.xmlrpcRequest("print_admin.getAllJobs", [session, '', '', 10])
           .catch((err) => {
@@ -50,7 +50,10 @@ export class AppService implements OnModuleDestroy {
           map(jobs => {
             return jobs.map(async (job: any) => {
               await this.xmlrpcRequest('call', [session, [['print.loadJobFromSpooler', job.id], ["print.getParam", "jobinfo1"]]])
-                .catch(err => console.log(err))
+                .catch(err => {
+                  console.log(err)
+                  return
+                })
                 .then((data) => {
                     job.baseId = parseInt(data[1].value)
                 })
@@ -73,7 +76,9 @@ export class AppService implements OnModuleDestroy {
                 //console.log(jobs)
                 try{
                   Promise.all(jobs)
-                  .catch(err => {return})
+                  .catch(err => {
+                    //console.log(err)
+                    return})
                   .then((jobs: any[]) => {
                     let sortedjobs: any[]
                     if(jobs){
@@ -156,15 +161,15 @@ export class AppService implements OnModuleDestroy {
     console.log('getPriview', request)
     let size = request['isFull'] ? '&w=520' : '&w=200';
     return this.httpService
-      //.get(`${this.urlEndpoint}print.getPrintPreview?id=${request['session']}${size}`,
-      .get(this.urlEndpoint +
-        'image.getFilteredData?id=' +
-        request['session'] +
-        '&x=0&y=0&w=0&h=0&w_out=600&highquality=0&set_filters_from_printparams=0&index=' +
-        request['jobid'] +
-        (new Date().getTime()),
+      .get(`${this.urlEndpoint}print.getPrintPreview?id=${request['session']}${size}`,
+      // .get(this.urlEndpoint +
+      //   'image.getFilteredData?id=' +
+      //   request['session'] +
+      //   '&x=0&y=0&w=0&h=0&w_out=600&highquality=0&set_filters_from_printparams=0&index=' +
+      //   request['jobid'] +
+      //   (new Date().getTime()),
         {
-          responseType: "arraybuffer"
+          responseType: "arraybuffer",
         })
       .pipe(
         map(response => {

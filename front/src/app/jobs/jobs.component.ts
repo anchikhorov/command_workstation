@@ -1,13 +1,14 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { MatMenuTrigger } from '@angular/material/menu';
-import { Subscription } from 'rxjs';
+//import { Subscription } from 'rxjs';
 import * as _ from "lodash";
 import { Job } from './job.model';
 import { JobsService } from './jobs.service';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { CookieService } from 'ngx-cookie-service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { JobPreviewComponent } from './job-preview/job-preview.component';
+import { JobPropertiesComponent } from './job-properties/job-properties.component';
 import { WebSocketService } from '../web-socket.service';
 
 
@@ -25,6 +26,7 @@ export class JobsComponent implements OnInit, OnDestroy {
   isRowAndImageIdEqual = false
   session: string = ''
   deleted!: number
+  properties: any[] = []
 
   constructor(
     private jobservice: JobsService,
@@ -35,15 +37,11 @@ export class JobsComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
-    // this.jobsSub = this.jobservise.renderJobs().subscribe(jobs => {
-    //   this.jobs = jobs
-    // })
+
     this.webSocketService.listen('jobs').subscribe(data =>{
-      //console.log(jobs)
       this.jobs = JSON.parse(String(data))
     })
     this.webSocketService.listen('session').subscribe(data =>{
-      //console.log(data)
       this.session = String(data)
       console.log(this.session)
     })
@@ -71,15 +69,14 @@ export class JobsComponent implements OnInit, OnDestroy {
       this.isRowAndImageIdEqual = false
       this.img = null
       this.loading = false
-      //console.log("!this.loading && this.isRowAndImageIdEqual",!this.loading && this.isRowAndImageIdEqual)
-      //this.jobservice.smallPreviewImages.delete(row.id)
 
     })
 
-    this.webSocketService.listen('properties').subscribe(data =>{
-      console.log(data)
+    // this.webSocketService.listen('properties').subscribe((response) =>{
+    //   this.properties = JSON.parse(String(response))
+    //   //console.log(responseData[0]['rotate_to_orientation'])
 
-    })
+    // })
   }
 
 
@@ -104,8 +101,6 @@ export class JobsComponent implements OnInit, OnDestroy {
       jobid: row.id
     }
     this.webSocketService.emit('resume',JSON.stringify(request))
-    // this.jobservise.resumeJob(row.id)
-    //   .subscribe(() => console.log(`job ${row.id} was resumed`))
   }
 
   onContextMenuDelete(row: PeriodicElement) {
@@ -117,47 +112,24 @@ export class JobsComponent implements OnInit, OnDestroy {
     this.webSocketService.emit('delete',JSON.stringify(request))
     this.jobservice.smallPreviewImages.delete(row.id)
     this.deleted = row.id
-    // this.jobservise.deleteJob(row.id).subscribe(() => {
-    //   this.clickedRow.clear();
-    //   this.isIdEqual()
-    //   this.img = null
-    //   this.smallPreviewImages.delete(row.id)
-    //   console.log(`job ${row.id} was deleted`)
-    // })
   }
 
 
   onContextMenuPreview(row: PeriodicElement) {
-    // if (this.jobservise.fullPreviewImages.get(row.id)) {
-    //   this.img = this.sanitizer.bypassSecurityTrustUrl(this.jobservise.fullPreviewImages.get(row.id));
-    //   this.loading = false
-    //   //this.jobservise.loading = this.loading
-    //   this.isRowAndImageIdEqual = true
-    // } else {
-    //   this.openBigPreview(row.id)
-    // }
     this.openBigPreview(row.id)
      
   }
 
   onContextMenuProperties(row: PeriodicElement) {
-    //alert(`Click on Action 2 for ${row.id}`);
-    this.webSocketService.emit('properties',String(row.id))
+    this.openProperties(row.id)
+        //this.webSocketService.emit('properties',String(row.id))
   }
 
   onRowClick(row: PeriodicElement) {
-    // if (this.previewSub) {
-    //   this.previewSub.unsubscribe();
-    // }
     if (!this.isRowsEqual(row)) {
-      //console.log(this.isRowsEqual(row))
       this.clickedRow.clear();
       this.clickedRow.add(row)
-      //this.isIdEqual()
-      //console.log('this.jobservice.smallPreviewImages.get(row.id)',this.jobservice.smallPreviewImages.get(row.id))
-      //console.log(this.jobservice.smallPreviewImages)
       if (this.jobservice.smallPreviewImages.has(row.id) && (row.id != this.deleted)) {
-        //console.log('this.jobservice.smallPreviewImages.has(row.id)',this.jobservice.smallPreviewImages.has(row.id))
         this.img = this.jobservice.smallPreviewImages.get(row.id);
         this.loading = false
         this.isRowAndImageIdEqual = true
@@ -169,84 +141,61 @@ export class JobsComponent implements OnInit, OnDestroy {
 
   getPreview(id: number) {
     this.loading = true
-    //this.loaded = false
-    //console.log('this.session', this.session)
     let data = {
       session: this.session,
       jobid: id,
       isFull: false
     }
     this.webSocketService.emit('previewSmall',JSON.stringify(data))
-    // if (this.previewSub) {
-    //   this.previewSub.unsubscribe()
-    // }
-    // this.jobservise.getPreview(id, false)
-    // this.previewSub = this.jobservise.renderPreview().subscribe(
-    //   {
-    //     next: (value: any) => {
-    //       const mediaType = 'image/png';
-    //       const blob = new Blob([value], { type: mediaType });
-    //       const unsafeImg = URL.createObjectURL(blob);
-    //       this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
-    //       this.isIdEqual()
-    //       this.loading = false
-    //       const reader = new FileReader()
-    //       reader.readAsDataURL(blob)
-    //       reader.addEventListener('load', () => {
-    //         this.smallPreviewImages.set(id, reader.result)
-    //       })
-
-    //     },
-    //     error: (e: any) => console.error(e),
-    //     complete: () => console.info('complete')
-    //   }
-    // );
-
+   
   }
 
 
   openBigPreview(id: number) {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
     this.loading = false;
     this.jobservice.loading = true
     this.jobservice.jobId = id;
-    //console.log(this.jobservise.jobId);
-    // if (this.previewSub) {
-    //   this.previewSub.unsubscribe();
-    // }
-    //this.loading = true
-    //console.log('this.session', this.session)
     let data = {
       session: this.session,
       jobid: id,
       isFull: true
     }
     this.webSocketService.emit('preview',JSON.stringify(data))
-    // let isFullPreviewPresent: Boolean = this.cookieService
-    //   .get('isFull') ? Boolean(JSON.parse(this.cookieService
-    //     .get('isFull'))) : false
-    const dialogRef = this.dialog.open(JobPreviewComponent);
+    const dialogRef = this.dialog.open(JobPreviewComponent, dialogConfig);
     dialogRef.afterClosed().subscribe(result => {
-      // if (this.jobservice.smallPreviewImages.has(this.clickedRow.values().next().value) && (this.clickedRow.values().next().value != this.deleted)) {
-      //   console.log('this.jobservice.smallPreviewImages.has(row.id)',this.jobservice.smallPreviewImages.has(this.clickedRow.values().next().value))
-      //   this.img = this.jobservice.smallPreviewImages.get(this.clickedRow.values().next().value);
-      //   this.loading = false
-      //   this.isRowAndImageIdEqual = true
-      // } else {
-      //   this.getPreview(this.clickedRow.values().next().value)
-      // }
       console.log(`Dialog result: ${result}`);
     });
   }
 
-  // isIdEqual() {
-  //   if (this.clickedRow.size == 1) {
-  //     return this.isRowAndImageIdEqual = (this.clickedRow
-  //       .values()
-  //       .next()
-  //       .value.id == parseInt(this.cookieService.get('id')))
-  //   }
-  //   return this.isRowAndImageIdEqual = false;
-  // }
+  openProperties(id: number) {
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.disableClose = true;
+    dialogConfig.autoFocus = true;
+    dialogConfig.height = '95%'
+    dialogConfig.width = '100%'
+    dialogConfig.data = 
+    {
+      session: this.session,
+      jobid: id,
+    }
+    this.loading = false;
+    this.jobservice.loading = true
+    //this.jobservice.jobId = id;
+    // let data = {
+    //   session: this.session,
+    //   jobid: id,
+    //   isFull: true
+    // }
+    // this.webSocketService.emit('properties',JSON.stringify(data))
+    const dialogRef = this.dialog.open(JobPropertiesComponent, dialogConfig);
+    dialogRef.afterClosed().subscribe(result => {
+      console.log(`Dialog result: ${result}`);
+    });
+  }
+
 
   isRowsEqual(row: PeriodicElement) {
     return _.isEqual(this.clickedRow.values().next().value, row)
@@ -258,13 +207,10 @@ export class JobsComponent implements OnInit, OnDestroy {
 
   isLoaded() {  
     this.loading = false
-    //this.jobservice.smallPreviewImages.set(imgid, this.img)
-    //console.log('imgid', imgid)
   }
 
   ngOnDestroy() {
-    //this.jobsSub.unsubscribe();
-    //this.previewSub.unsubscribe();
+
   }
 
 }

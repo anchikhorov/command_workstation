@@ -8,13 +8,15 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AngularMaterialModule } from './theme/angular-material.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { JobPreviewComponent } from './jobs/job-preview/job-preview.component';
+import { JobPropertiesComponent } from './jobs/job-properties/job-properties.component';
 //import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
   declarations: [
     AppComponent,
     JobsComponent,
-    JobPreviewComponent
+    JobPreviewComponent,
+    JobPropertiesComponent
   ],
   imports: [
     BrowserModule,

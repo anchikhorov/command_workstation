@@ -70,7 +70,7 @@
              fxFlex="11" 
              fxLayout="column" 
              fxLayoutAlign="start center" 
-             class="job-small-preview scrollable-content">
+             class="job-small-preview">
 
             <div 
                fxLayout="column" 
@@ -84,15 +84,17 @@
                </mat-spinner>
                 
             </div>
-
+           <div *ngIf="!loading && isRowAndImageIdEqual" class='img-container scrollable-content shadow'>
             <img 
-              [src]="img" 
-              *ngIf="!loading && isRowAndImageIdEqual" 
-              class="preview-img shadow" 
-              (load)='isLoaded()' 
-              [className]="loading ? 'hidden' : 'preview-img shadow'" 
-              fxLayout="row" 
-              fxLayoutAlign="space-around center">
+            [src]="img" 
+            *ngIf="!loading && isRowAndImageIdEqual" 
+            class="preview-img shadow" 
+            (load)='isLoaded()' 
+            [className]="loading ? 'hidden' : 'preview-img shadow'" 
+            fxLayout="row" 
+            fxLayoutAlign="space-around center">
+           </div>
+
         </div>
 
 </div>

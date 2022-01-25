@@ -121,7 +121,7 @@ export class JobsComponent implements OnInit, OnDestroy {
   }
 
   onContextMenuProperties(row: PeriodicElement) {
-    this.openProperties(row.id)
+    this.openProperties(row.id, row.baseId)
         //this.webSocketService.emit('properties',String(row.id))
   }
 
@@ -170,7 +170,7 @@ export class JobsComponent implements OnInit, OnDestroy {
     });
   }
 
-  openProperties(id: number) {
+  openProperties(id: number, baseId: number) {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
@@ -180,6 +180,7 @@ export class JobsComponent implements OnInit, OnDestroy {
     {
       session: this.session,
       jobid: id,
+      baseId: baseId
     }
     this.loading = false;
     this.jobservice.loading = true
@@ -224,6 +225,7 @@ export interface PeriodicElement {
   printer: string;
   foldprogram: string;
   state: string;
+  baseId: number;
 }
 
 

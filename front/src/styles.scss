@@ -4,22 +4,32 @@ html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .mat-form-field.mat-focused .mat-form-field-ripple{
-    background-color: black;
+    background-color: white;
   }
   .mat-form-field.mat-focused.mat-primary .mat-select-arrow {
-    color: black;
+    color: white;
   }    
   .mat-primary .mat-option.mat-selected:not(.mat-option-disabled) {
-    color: black;
+    color: white;
   }
 
   .mat-form-field.mat-focused .mat-form-field-label{
-    color: black;
+    color: white;
   }
 
   .mat-form-field.mat-focused .mat-select-value-text{
-    color: black;
+    color: white;
   }
+
+  .mat-form-field.mat-focused .mat-input-element{
+    color: white;
+  }
+
+  .mat-form-field.mat-focused.mat-primary .mat-form-field-flex {
+    background-color: rgb(155, 153, 153);
+  } 
+
+
 
 
 

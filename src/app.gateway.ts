@@ -107,8 +107,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   }
 
-  @SubscribeMessage('properties')
-  handleProperties(client: Socket, request: string) {
+  @SubscribeMessage('getProperties')
+  getProperties(client: Socket, request: string) {
     let requestData = JSON.parse(request)
     console.log(requestData)
     this.appService.xmlrpcRequest(
@@ -120,8 +120,33 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         ['print.getParam', 'info_supports_color']
       ]])
       .catch(err => console.log(err))
-      .then(response => client.emit('properties', JSON.stringify(response)))
-    //return { event: 'properties', data: 'properties' };
+      .then(response => client.emit('getProperties', JSON.stringify(response)))
+  }
+
+  @SubscribeMessage('setProperties')
+  setProperties(client: Socket, request: string) {
+    let requestData = JSON.parse(request)
+    console.log(requestData)
+    this.appService.xmlrpcRequest(
+      'call',
+      [requestData['session'],
+      [
+        ['print.loadJobFromSpooler', parseInt(requestData['jobid'])],
+        ['scan.saveActiveSetFileOptions'],
+        ['print.setParam', 'copies_file', requestData['copies_file']],
+        ['print.setParam', 'medium', requestData['medium']],
+        ['print.setParam', 'mediasource', requestData['mediasource']],
+        ['print.setParam', 'auto_cropping', String(requestData['auto_cropping'])],
+        ['print.setParam', 'rotation', requestData['rotation']],
+        ['print.setParam', 'rotate_to_orientation', requestData['rotate_to_orientation']],
+        ['print.setParam', 'roll_placement', requestData['roll_placement']],
+        ['print.setParam', 'stampoption', requestData['stampoption']],
+        ['print.setParam', 'jobinfo1', requestData['baseId'] != null ? requestData['baseId'] : requestData['jobid']],
+        ['print.startSet', 0],
+        ['print_admin.cancelJob', parseInt(requestData['jobid'])]
+      ]])
+      .catch(err => console.log(err))
+      .then(response => console.log(response))
   }
 
 }

@@ -1,45 +1,46 @@
 <mat-dialog-content сlass="properties-dialog" >
-    <!-- <div fxLayout="column" fxLayoutAlign="center center" *ngIf="loading" class='mat-spinner-window'>
-        <mat-spinner *ngIf="loading" diameter="40"></mat-spinner>
-    </div> -->
     
         <div fxFlex='50' class=".properties-preview-window">
-            <!-- <div fxLayout="column" fxLayoutAlign="center center" class=".properties-preview-window"> -->
-            <!-- <mat-spinner *ngIf="loading" diameter="40" ></mat-spinner> -->
         </div>
-        <!-- <div fxLayout="column" class=".properties-list-window"> -->
+        <form [formGroup]="form" (submit)='onSubmit()'>
         <div fxFlex='50' fxLayoutGap fxLayoutAlign="space-around start" class=".properties-list-window">
             <fieldset fxFlex=45 fxLayout="column" fxLayoutGap>
                 <legend>File presets</legend>
                 <fieldset>
                     <legend>Color mode</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                     <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
                         <mat-label>Color mode</mat-label>
-                        <mat-select placeholder="Not selected" disabled=" !choice.value ? true : false" formControlName="colormode" name="colormode" [value]="properties[2].value">
-                            <mat-option *ngFor="let choice of choices" [value]="choice.value">
-                                {{choice.value}}
+                        <mat-select 
+                        placeholder="Not selected" 
+                        formControlName="colormode" 
+                        name="colormode"  
+                        >
+                            <mat-option *ngFor="let choice of properties[0]['colormode'].values" [value]="choice">
+                                {{choice}}
                             </mat-option>
                         </mat-select>
-                        <!-- <mat-error *ngIf="form.get('appname').invalid">Выберите наименование ПО.</mat-error> -->
                     </mat-form-field>
                 </fieldset>
                 <fieldset>
                     <legend>Copies</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                     <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
                         <mat-label>Copies</mat-label>
-                        <input matInput type="number" placeholder="Not set" [value]="properties[1]['copies'].value" [min]="properties[1]['copies'].min + 1" [max]="properties[1]['copies'].max">
+                        <input 
+                        matInput type="number" 
+                        placeholder="Not set" 
+                        formControlName="copies_file" 
+                        name="copies_file" 
+                        [min] = "properties[0]['copies_file'].min"
+                        [max] = "properties[0]['copies_file'].max"
+                        >
                     </mat-form-field>
                 </fieldset>
                 <fieldset>
                     <legend>Medium / Roll</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                     <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
                         <mat-label>Medium</mat-label>
-                        <mat-select placeholder="Not selected" formControlName="medium" name="medium"
-                            [value]="properties[1]['medium'].value">
-                            <mat-option *ngFor="let medium of properties[1]['medium'].values" [value]="medium">
+                        <mat-select placeholder="Not selected" formControlName="medium" name="medium">
+                            <mat-option *ngFor="let medium of properties[0]['medium'].values" [value]="medium">
                                 {{medium}}
                             </mat-option>
                         </mat-select>
@@ -47,46 +48,43 @@
                     <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
                         <mat-label>Mediasource</mat-label>
                         <mat-select placeholder="Not selected" formControlName="mediasource" name="mediasource"
-                            [value]="properties[1]['mediasource'].value">
-                            <mat-option *ngFor="let mediasource of properties[1]['mediasource'].values" [value]="mediasource">
+                            [value]="properties[0]['mediasource'].value">
+                            <mat-option *ngFor="let mediasource of properties[0]['mediasource'].values" [value]="mediasource">
                                 {{mediasource}}
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
                     <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
                         <mat-label>Auto-cropping</mat-label>
-                        <mat-select placeholder="Not selected" formControlName="autocrop" name="autocrop"
-                            [value]="properties[1]['auto_cropping'].value">
-                            <mat-option *ngFor="let choice of choices" [value]="choice.value">
-                                {{choice.value}}
+                        <mat-select placeholder="Not selected" formControlName="auto_cropping" name="auto_cropping">
+                            <mat-option *ngFor="let choice of properties[0]['auto_cropping'].values" [value]="choice">
+                                {{choice}}
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
                 </fieldset>
                 <fieldset>
                     <legend>Rotation / Orientation</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                     <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
                         <mat-label>Rotation</mat-label>
-                        <mat-select placeholder="Not selected" formControlName="rotation" name="rotation" [value]="properties[1]['rotation'].value">
-                            <mat-option *ngFor="let rotate of properties[1]['rotation'].values" [value]="rotate">
+                        <mat-select placeholder="Not selected" formControlName="rotation" name="rotation">
+                            <mat-option *ngFor="let rotate of properties[0]['rotation'].values" [value]="rotate">
                                 {{rotate}}
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <!-- <mat-spinner *ngIf="loading" diameter="20"></mat-spinner> -->
                     <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
                         <mat-label>Output orientation</mat-label>
-                        <mat-select placeholder="Not selected" formControlName="rotate_to_orientation" name="rotate_to_orientation" [value]="properties[1]['rotate_to_orientation'].value">
-                            <mat-option *ngFor="let rotate of properties[1]['rotate_to_orientation'].values" [value]="rotate">
+                        <mat-select placeholder="Not selected" formControlName="rotate_to_orientation" name="rotate_to_orientation">
+                            <mat-option *ngFor="let rotate of properties[0]['rotate_to_orientation'].values" [value]="rotate">
                                 {{rotate}}
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
                     <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
                         <mat-label>Roll placement</mat-label>
-                        <mat-select placeholder="Not selected" formControlName="roll_placement" name="roll_placement" [value]="properties[1]['roll_placement'].value">
-                            <mat-option *ngFor="let placement of properties[1]['roll_placement'].values" [value]="placement">
+                        <mat-select placeholder="Not selected" formControlName="roll_placement" name="roll_placement">
+                            <mat-option *ngFor="let placement of properties[0]['roll_placement'].values" [value]="placement">
                                 {{placement}}
                             </mat-option>
                         </mat-select>
@@ -94,11 +92,10 @@
                 </fieldset>
                 <fieldset>
                     <legend>Stamps / Labels</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                     <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
                         <mat-label>Stampoption</mat-label>
-                        <mat-select placeholder="Not selected" formControlName="stampoption" name="stampoption" [value]="properties[1]['stampoption'].value">
-                            <mat-option *ngFor="let stamp of properties[1]['stampoption'].values" [value]="stamp">
+                        <mat-select placeholder="Not selected" formControlName="stampoption" name="stampoption">
+                            <mat-option *ngFor="let stamp of properties[0]['stampoption'].values" [value]="stamp">
                                 {{stamp}}
                             </mat-option>
                         </mat-select>
@@ -106,47 +103,38 @@
                 </fieldset>
                 <fieldset>
                     <legend>Scaling / Margins</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                 </fieldset>
                 <fieldset>
                     <legend>Folding / Output</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                 </fieldset>
                 <fieldset>
                     <legend>Quality</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                 </fieldset>
             </fieldset>
             <fieldset fxFlex=45 fxLayout="column">
                 <legend>Job settings</legend>
                 <fieldset>
                     <legend>Printer</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                 </fieldset>
                 <fieldset>
                     <legend>Copies (set)</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                 </fieldset>
                 <fieldset>
                     <legend>Job</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                 </fieldset>
                 <fieldset>
                     <legend>Banner</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                 </fieldset>
                 <fieldset>
                     <legend>Miscellanious</legend>
-                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
                 </fieldset>
             </fieldset>
         </div>
-
+    </form>
     
 </mat-dialog-content>
 
 <mat-dialog-actions fxLayoutAlign="end">
     <button mat-button mat-dialog-close>Close</button>
-    <!-- <button mat-button [mat-dialog-close]="true">Apply</button> -->
-    <button mat-button [mat-dialog-close]="true" cdkFocusInitial>Apply</button>
+    <button mat-button [mat-dialog-close]="true" cdkFocusInitial (click)='onSubmit()'>Apply</button>
 </mat-dialog-actions>

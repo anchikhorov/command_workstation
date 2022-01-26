@@ -29,6 +29,10 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     background-color: rgb(155, 153, 153);
   } 
 
+  .mat-dialog-container {
+    overflow-y: hidden !important;
+  }
+
 
 
 

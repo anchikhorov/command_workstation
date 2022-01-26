@@ -1,14 +1,15 @@
-<mat-dialog-content сlass="properties-dialog" >
-    
-        <div fxFlex='50' class=".properties-preview-window">
+<mat-dialog-content >
+        <div fxFlex="50" class="properties-preview-window">
+
         </div>
-        <form [formGroup]="form" (submit)='onSubmit()'>
-        <div fxFlex='50' fxLayoutGap fxLayoutAlign="space-around start" class=".properties-list-window">
-            <fieldset fxFlex=45 fxLayout="column" fxLayoutGap>
+        <form fxFlex="50" [formGroup]="form" (submit)='onSubmit()' class="properties-list-window">
+        <!-- <div  class="properties-list-window"> -->
+        <fieldset fxLayout="column">   
+            <fieldset fxLayout="column">
                 <legend>File presets</legend>
                 <fieldset>
                     <legend>Color mode</legend>
-                    <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Color mode</mat-label>
                         <mat-select 
                         placeholder="Not selected" 
@@ -23,7 +24,7 @@
                 </fieldset>
                 <fieldset>
                     <legend>Copies</legend>
-                    <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Copies</mat-label>
                         <input 
                         matInput type="number" 
@@ -37,7 +38,7 @@
                 </fieldset>
                 <fieldset>
                     <legend>Medium / Roll</legend>
-                    <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Medium</mat-label>
                         <mat-select placeholder="Not selected" formControlName="medium" name="medium">
                             <mat-option *ngFor="let medium of properties[0]['medium'].values" [value]="medium">
@@ -45,7 +46,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Mediasource</mat-label>
                         <mat-select placeholder="Not selected" formControlName="mediasource" name="mediasource"
                             [value]="properties[0]['mediasource'].value">
@@ -54,7 +55,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Auto-cropping</mat-label>
                         <mat-select placeholder="Not selected" formControlName="auto_cropping" name="auto_cropping">
                             <mat-option *ngFor="let choice of properties[0]['auto_cropping'].values" [value]="choice">
@@ -65,7 +66,7 @@
                 </fieldset>
                 <fieldset>
                     <legend>Rotation / Orientation</legend>
-                    <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Rotation</mat-label>
                         <mat-select placeholder="Not selected" formControlName="rotation" name="rotation">
                             <mat-option *ngFor="let rotate of properties[0]['rotation'].values" [value]="rotate">
@@ -73,7 +74,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Output orientation</mat-label>
                         <mat-select placeholder="Not selected" formControlName="rotate_to_orientation" name="rotate_to_orientation">
                             <mat-option *ngFor="let rotate of properties[0]['rotate_to_orientation'].values" [value]="rotate">
@@ -81,7 +82,7 @@
                             </mat-option>
                         </mat-select>
                     </mat-form-field>
-                    <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Roll placement</mat-label>
                         <mat-select placeholder="Not selected" formControlName="roll_placement" name="roll_placement">
                             <mat-option *ngFor="let placement of properties[0]['roll_placement'].values" [value]="placement">
@@ -92,7 +93,7 @@
                 </fieldset>
                 <fieldset>
                     <legend>Stamps / Labels</legend>
-                    <mat-form-field *ngIf="!loading" appearance="fill" fxLayout="column" fxLayoutAlign="center center">
+                    <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Stampoption</mat-label>
                         <mat-select placeholder="Not selected" formControlName="stampoption" name="stampoption">
                             <mat-option *ngFor="let stamp of properties[0]['stampoption'].values" [value]="stamp">
@@ -111,7 +112,7 @@
                     <legend>Quality</legend>
                 </fieldset>
             </fieldset>
-            <fieldset fxFlex=45 fxLayout="column">
+            <fieldset fxLayout="column">
                 <legend>Job settings</legend>
                 <fieldset>
                     <legend>Printer</legend>
@@ -129,12 +130,13 @@
                     <legend>Miscellanious</legend>
                 </fieldset>
             </fieldset>
-        </div>
+        </fieldset>     
+        <!-- </div> -->
     </form>
     
 </mat-dialog-content>
 
-<mat-dialog-actions fxLayoutAlign="end">
+<mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Close</button>
     <button mat-button [mat-dialog-close]="true" cdkFocusInitial (click)='onSubmit()'>Apply</button>
 </mat-dialog-actions>

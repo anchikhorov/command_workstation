@@ -1,5 +1,5 @@
 .mat-dialog-content{
-    overflow-x: hidden;
+    overflow: hidden;
     max-height: 85vh;
 
 }
@@ -23,8 +23,7 @@
 
   .properties-preview-window{
     border: 1px solid white;
-    width: 100%;
-    height: 100%;
+    max-height: 85vh;
     //@include mat.elevation(10);
  }
 
@@ -36,3 +35,12 @@
  .hidden{
   visibility: hidden;
  }
+fieldset{
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+legend{
+  padding-top: 10px;
+  padding-bottom: 10px;
+}

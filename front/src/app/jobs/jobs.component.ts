@@ -175,7 +175,7 @@ export class JobsComponent implements OnInit, OnDestroy {
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
     dialogConfig.height = '95%'
-    dialogConfig.width = '100%'
+    dialogConfig.width = '800px'
     dialogConfig.data = 
     {
       session: this.session,

@@ -7,7 +7,7 @@
         <fieldset fxLayout="column">   
             <fieldset fxLayout="column">
                 <legend>File presets</legend>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Color mode</legend>
                     <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Color mode</mat-label>
@@ -22,11 +22,12 @@
                         </mat-select>
                     </mat-form-field>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Copies</legend>
                     <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Copies</mat-label>
                         <input 
+                        
                         matInput type="number" 
                         placeholder="Not set" 
                         formControlName="copies_file" 
@@ -36,7 +37,7 @@
                         >
                     </mat-form-field>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Medium / Roll</legend>
                     <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Medium</mat-label>
@@ -64,7 +65,7 @@
                         </mat-select>
                     </mat-form-field>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Rotation / Orientation</legend>
                     <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Rotation</mat-label>
@@ -91,7 +92,7 @@
                         </mat-select>
                     </mat-form-field>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Stamps / Labels</legend>
                     <mat-form-field *ngIf="!loading" appearance="fill">
                         <mat-label>Stampoption</mat-label>
@@ -102,31 +103,31 @@
                         </mat-select>
                     </mat-form-field>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Scaling / Margins</legend>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Folding / Output</legend>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Quality</legend>
                 </fieldset>
             </fieldset>
             <fieldset fxLayout="column">
                 <legend>Job settings</legend>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Printer</legend>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Copies (set)</legend>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Job</legend>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Banner</legend>
                 </fieldset>
-                <fieldset>
+                <fieldset fxLayout="column" fxLayoutAlign="center center">
                     <legend>Miscellanious</legend>
                 </fieldset>
             </fieldset>

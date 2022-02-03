@@ -63,6 +63,7 @@ export class JobPropertiesComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    this.loading = true
     this.form = new FormGroup({
       colormode: new FormControl(null, { validators: [] }),
       copies_file: new FormControl(null, { validators: [] }),
@@ -76,7 +77,7 @@ export class JobPropertiesComponent implements OnInit {
     });
 
 
-    this.loading = false
+    
     this.webSocketService.emit('getProperties', JSON.stringify(this.data))
     this.webSocketService.listen('getProperties').subscribe((response) => {
       let properties = JSON.parse(String(response))
@@ -97,7 +98,7 @@ export class JobPropertiesComponent implements OnInit {
       this.properties[0]['stampoption'].value = properties[1]['stampoption'].value
       this.properties[0]['stampoption'].values = properties[1]['stampoption'].values
       
-      this.loading = false
+      
       this.form.setValue({
         colormode: this.properties[0]['colormode'].value,//{ value: this.properties[2].value, disabled: this.properties[2].value},
         copies_file: this.properties[0]['copies_file'].value,
@@ -113,7 +114,7 @@ export class JobPropertiesComponent implements OnInit {
         //console.log(this.form)
         this.form.controls['colormode'].disable()
       }
-      
+      this.loading = false
 
     })
   }

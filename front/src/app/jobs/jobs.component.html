@@ -74,23 +74,27 @@
 
             <div 
                fxLayout="column" 
-               fxLayoutAlign="space-around center" 
-               *ngIf="loading || !isRowAndImageIdEqual"  
-               class="preview-window shadow">
+               fxLayoutAlign="space-around center"  
+               *ngIf="!img" 
+               class="preview-window shadow"
+               >
 
-               <mat-spinner 
+               <!-- <mat-spinner 
                   *ngIf="loading" 
                   diameter="40" >
-               </mat-spinner>
+               </mat-spinner> -->
                 
             </div>
-           <div *ngIf="!loading && isRowAndImageIdEqual" class='img-container scrollable-content shadow'>
+           <!-- <div class = 'img-container scrollable-content shadow'> -->
+            <div >
             <img 
-            [src]="img" 
-            *ngIf="!loading && isRowAndImageIdEqual" 
-            class="preview-img shadow" 
+            [src]="img"
+            *ngIf="img"
+            data-max-retry="10" 
+            data-retry="0" 
             (load)='isLoaded()' 
-            [className]="loading ? 'hidden' : 'preview-img shadow'" 
+            (error)="waitAndReload(img,$event)"
+            class = 'preview-img shadow'
             fxLayout="row" 
             fxLayoutAlign="space-around center">
            </div>
@@ -125,4 +129,5 @@
         >Properties</button>
     </ng-template>
 </mat-menu>
+
 

@@ -24,38 +24,13 @@ export class JobPreviewComponent implements OnInit {
     this.webSocketService.listen('preview').subscribe(response =>{
       let data = JSON.parse(String(response))
       this.img = this.sanitizer.bypassSecurityTrustUrl(data['dataUrl']);
-      this.jobservise.loading = false
-      this.loading = this.jobservise.loading
-      //this.isRowAndImageIdEqual = true
-      this.jobservise.fullPreviewImages.set(data['jobid'], data['dataUrl'])
+      this.loading = false
 
     })
-    //this.getPreview(this.jobservise.jobId)
+    
   }
 
 
-  // getPreview(id: number){
-  //   this.loading = true
-  //   this.img = null
-  //   if(this.previewSub){
-  //     this.previewSub.unsubscribe()
-  //   }
-  //   this.jobservise.getPreview(id,true)
-  //   this.previewSub = this.jobservise.renderPreview().subscribe(
-  //     {
-  //       next: (value: any) => {
-  //           const mediaType = 'image/png';
-  //           const blob = new Blob([value], { type: mediaType });
-  //           const unsafeImg = URL.createObjectURL(blob);
-  //           this.img = this.sanitizer.bypassSecurityTrustUrl(unsafeImg);
-            
-  //       },
-  //       error: (e: any) => console.error(e),
-  //       complete: () => console.info('complete') 
-  //     }
-      
-  //   );
-  // }
 
   isLoaded(){
     this.loading = false
@@ -65,7 +40,7 @@ export class JobPreviewComponent implements OnInit {
     if( this.previewSub){
       this.previewSub.unsubscribe();
     }
-    //this.jobservise.jobId = 0
+    
     this.img = null
   }
 }

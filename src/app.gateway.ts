@@ -8,7 +8,7 @@ import {
   OnGatewayDisconnect,
   WsResponse
 } from '@nestjs/websockets';
-//import { response } from 'express';
+import bufferToDataUrl from "buffer-to-data-url";
 import { Socket, Server } from 'socket.io';
 import { AppService } from './app.service';
 
@@ -32,6 +32,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       .catch((err) => console.log(err))
       .then(session => {
         console.log(session)
+        this.appService.stopPolling()
         this.appService.polling(session)
         client.emit('session', session)
       })
@@ -67,31 +68,37 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       .catch((err) => console.log(err))
       .then(response => {
         client.emit('delete', `job ${requestData['jobid']} was deleted`)
+        this.appService.deletePreview(parseInt(requestData['jobid']))
       })
   }
 
-  @SubscribeMessage('previewSmall')
-  handleSmallPreview(client: Socket, request: string) {
-    let requestData = JSON.parse(request)
-    this.appService.xmlrpcRequest(
-      "print.loadJobFromSpooler",
-      [requestData['session'],
-      parseInt(requestData['jobid'])]
-    )
-      .catch((err) => console.log(err))
-      .then(async () =>
-        this.appService.getPreview(requestData).subscribe({
-          next: response => client.emit('previewSmall', JSON.stringify(response)),
-          error: e => console.log(e),
-          complete: () => console.log('getPriview completed!')
-        }))
+  // @SubscribeMessage('previewSmall')
+  // handleSmallPreview(client: Socket, request: string) {
+  //   let requestData = JSON.parse(request)
+  //   this.appService.xmlrpcRequest(
+  //     'call',
+  //     [requestData['session'],
+  //     [
+  //       ['print.loadJobFromSpooler', parseInt(requestData['jobid'])],
+  //       ['scan.setActiveSetFile'],
+  //     ]])
+  //     // "print.loadJobFromSpooler",
+  //     // [requestData['session'],
+  //     // parseInt(requestData['jobid'])]
+  //   //)
+  //     .catch((err) => console.log(err))
+  //     .then(async () =>
+  //       this.appService.getPreview(requestData).subscribe({
+  //         next: response => client.emit('previewSmall', JSON.stringify(response)),
+  //         error: e => console.log(e),
+  //         complete: () => console.log('getPriview completed!')
+  //       }))
 
-  }
+  // }
 
   @SubscribeMessage('preview')
   handlePreview(client: Socket, request: string) {
     let requestData = JSON.parse(request)
-    //this.appService.loadJobFromSpooler(requestData['session'],parseInt(requestData['jobid']))
     this.appService.xmlrpcRequest(
       "print.loadJobFromSpooler",
       [requestData['session'],
@@ -100,7 +107,16 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       .catch((err) => console.log(err))
       .then(async () =>
         this.appService.getPreview(requestData).subscribe({
-          next: response => client.emit('preview', JSON.stringify(response)),
+          next: response => {
+          let data = {
+            jobid: null,
+            dataUrl: null
+          }
+          data['jobid'] = parseInt(requestData['jobid']),
+          data['dataUrl'] = bufferToDataUrl("image/png", Buffer.from(response))
+          // return data
+            client.emit('preview', JSON.stringify(data))
+          },
           error: e => console.log(e),
           complete: () => console.log('getPriview completed!')
         }))

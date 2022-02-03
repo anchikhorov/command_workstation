@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient} from "@angular/common/http";
-import { Observable, timer, Subscription, Subject } from "rxjs";
-import { map, repeatWhen, switchMap, takeUntil } from 'rxjs/operators';
+import { Observable, Subscription, Subject } from "rxjs";
+import { map} from 'rxjs/operators';
 import { Job } from "./job.model"
 import * as moment from 'moment';
 

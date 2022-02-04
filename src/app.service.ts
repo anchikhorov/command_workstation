@@ -210,7 +210,7 @@ export class AppService implements OnModuleDestroy {
         if (!files.includes(String(jobs[this.count]['id']))) {
           if (this.count < jobs.length) {
 
-            await this.xmlrpcRequest('call', [session, [['print.loadJobFromSpooler', jobs[this.count]['id']],]])
+            await this.xmlrpcRequest('call', [session, [['print.loadJobFromSpooler', jobs[this.count]['id'],['scan.setActiveSetFile']],]])
               .catch(err => console.log(err))
               .then(() => {
                 this.getPreview({
@@ -221,8 +221,8 @@ export class AppService implements OnModuleDestroy {
 
                   const controller = new AbortController();
                   const { signal } = controller;
-                  //writeFile(`${path}\\${jobs[this.count]['id']}`, Buffer.from(arrayBuffer), { signal });
-                  fs.writeFileSync(`${path}\\${jobs[this.count]['id']}`, Buffer.from(arrayBuffer))
+                  writeFile(`${path}\\${jobs[this.count]['id']}`, Buffer.from(arrayBuffer), { signal });
+                  //fs.writeFileSync(`${path}\\${jobs[this.count]['id']}`, Buffer.from(arrayBuffer))
                   this.count++
                   this.getPreviews(session, jobs, path)
                 })

@@ -32,11 +32,24 @@
 
   .preview-img{
     width: 100%;
-    -webkit-transition: opacity 1s ease-in-out;
-    -moz-transition: opacity 1s ease-in-out;
-    -o-transition: opacity 1s ease-in-out;
-    transition: opacity 1s ease-in-out;
   }
+
+  // .fade-in {
+  //   opacity: 1;
+  //   animation-name: fadeInOpacity;
+  //   animation-iteration-count: 1;
+  //   animation-timing-function: ease-in-out;
+  //   animation-duration: 0.5s;
+  // }
+  
+  // @keyframes fadeInOpacity {
+  //   0% {
+  //     opacity: 0;
+  //   }
+  //   100% {
+  //     opacity: 1;
+  //   }
+  // }
 
   .img-container{
     width: 100%;

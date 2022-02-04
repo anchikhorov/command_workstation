@@ -9,7 +9,7 @@ import {io} from 'socket.io-client';
 export class WebSocketService {
 
   socket: any;
-  readonly uri: string = 'ws://localhost:3000'
+  readonly uri: string = `ws://${window.location.hostname}:3000`
 
   constructor() { 
     this.socket = io(this.uri);

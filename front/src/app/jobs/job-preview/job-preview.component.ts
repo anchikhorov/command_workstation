@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Subscription} from 'rxjs';
 import { WebSocketService } from '../../web-socket.service';
-import { JobsService } from '../jobs.service';
+//import { JobsService } from '../jobs.service';
 
 @Component({
   selector: 'app-job-preview',
@@ -14,13 +14,13 @@ export class JobPreviewComponent implements OnInit {
   private previewSub!: Subscription;
   loading = false
   constructor(
-    private jobservise: JobsService,
+    //private jobservise: JobsService,
     private sanitizer: DomSanitizer,
     private webSocketService: WebSocketService
   ) { }
 
   ngOnInit(): void {
-    this.loading = this.jobservise.loading
+    this.loading = true
     this.webSocketService.listen('preview').subscribe(response =>{
       let data = JSON.parse(String(response))
       this.img = this.sanitizer.bypassSecurityTrustUrl(data['dataUrl']);

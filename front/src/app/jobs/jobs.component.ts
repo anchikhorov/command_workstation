@@ -63,13 +63,11 @@ export class JobsComponent implements OnInit, OnDestroy {
   }
 
 
-  @ViewChild(MatMenuTrigger)
-  // trigger!: QueryList<MatMenuTrigger>;
-  contextMenu!: MatMenuTrigger;
+  @ViewChild('trigger') contextMenu!: MatMenuTrigger;
   contextMenuPosition = { x: '0px', y: '0px' };
-  // contextHeaderMenu!: MatMenuTrigger;
-  // contextHeaderMenuPosition = { x: '0px', y: '0px' };
-  
+
+  @ViewChild('trigger1') contextMenu1!: MatMenuTrigger;
+   
 
   onContextMenu(event: MouseEvent, row: PeriodicElement) {
     if(row.state != 'DELETING'){
@@ -84,33 +82,41 @@ export class JobsComponent implements OnInit, OnDestroy {
 
   }
 
-  // onContextHeaderMenu(event: MouseEvent) {
-  //   event.preventDefault();
-  //   this.contextHeaderMenuPosition.x = event.clientX + 'px';
-  //   this.contextHeaderMenuPosition.y = event.clientY + 'px';
-  //   //this.contextMenu.menuData = { 'row': row };
-  //   this.contextHeaderMenu.menu.focusFirstItem('mouse');
-  //   this.contextHeaderMenu.openMenu();
-  // }
+  onContextMenu1(event: MouseEvent) {
+      event.preventDefault();
+      this.contextMenuPosition.x = event.clientX + 'px';
+      this.contextMenuPosition.y = event.clientY + 'px';
+      this.contextMenu1.menu.focusFirstItem('mouse');
+      this.contextMenu1.openMenu();
 
-  onContextMenuResume(row: PeriodicElement) {
+  }
+
+
+  onContextMenuResume(row: PeriodicElement | null) {
     let request = {
       session: this.session,
-      jobid: row.id
+      jobid: row ? row.id : null
     }
     this.webSocketService.emit('resume',JSON.stringify(request))
   }
 
-  onContextMenuDelete(row: PeriodicElement) {
-    row.state = 'DELETING'
+  onContextMenuDelete(row: PeriodicElement | null) {
+    row ? row.state = 'DELETING' : this.jobs.forEach(job => {job.state = 'DELETING'})
     let request = {
       session: this.session,
-      jobid: row.id
+      jobid: row ? row.id : null
     }
     this.webSocketService.emit('delete',JSON.stringify(request))
-    //this.jobservice.smallPreviewImages.delete(row.id)
-    //this.deleted = row.id
   }
+
+  onContextMenuHold(row: PeriodicElement | null) {
+    let request = {
+      session: this.session,
+      jobid: row ? row.id : null
+    }
+    this.webSocketService.emit('hold',JSON.stringify(request))
+  }
+
 
 
   onContextMenuPreview(row: PeriodicElement) {

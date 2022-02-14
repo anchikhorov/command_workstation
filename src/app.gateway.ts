@@ -6,7 +6,6 @@ import {
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  WsResponse
 } from '@nestjs/websockets';
 import bufferToDataUrl from "buffer-to-data-url";
 import { Socket, Server } from 'socket.io';
@@ -46,55 +45,62 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('resume')
   handleResume(client: Socket, request: string) {
     let requestData = JSON.parse(request)
-    this.appService.xmlrpcRequest(
-      "print_admin.resumeJob",
-      [requestData['session'],
-      parseInt(requestData['jobid'])]
-    )
-      .catch((err) => console.log(err))
-      .then(response => {
-        client.emit('resume', response)
-      })
+    if (requestData['jobid']!= null){
+      this.appService.xmlrpcRequest(
+        "print_admin.resumeJob",
+        [requestData['session'],
+        parseInt(requestData['jobid'])]
+      )
+        .catch((err) => console.log(err))
+        .then(response => {
+          client.emit('resume', response)
+        })
+    } 
+    if (requestData['jobid']=== null){
+      this.appService.xmlrpcRequest(
+        "print_admin.resumeAllJobs",
+        [requestData['session']
+      ]
+      )
+        .catch((err) => console.log(err))
+        .then(response => {
+          client.emit('resume', 'all jobs was resumed')
+          
+        })
+    }
+
   }
 
   @SubscribeMessage('delete')
   handleDelete(client: Socket, request: string) {
     let requestData = JSON.parse(request)
-    this.appService.xmlrpcRequest(
-      "print_admin.cancelJob",
-      [requestData['session'],
-      parseInt(requestData['jobid'])]
-    )
-      .catch((err) => console.log(err))
-      .then(response => {
-        client.emit('delete', `job ${requestData['jobid']} was deleted`)
-        this.appService.deletePreview(parseInt(requestData['jobid']))
-      })
+    if (requestData['jobid']!= null){
+      this.appService.xmlrpcRequest(
+        "print_admin.cancelJob",
+        [requestData['session'],
+        parseInt(requestData['jobid'])]
+      )
+        .catch((err) => console.log(err))
+        .then(response => {
+          client.emit('delete', `job ${requestData['jobid']} was deleted`)
+          this.appService.deletePreview(parseInt(requestData['jobid']))
+        })
+    }
+    if (requestData['jobid'] === null){
+      this.appService.xmlrpcRequest(
+        "print_admin.cancelAllJobs",
+        [requestData['session']
+      ]
+      )
+        .catch((err) => console.log(err))
+        .then(response => {
+          client.emit('delete', `all jobs was deleted`)
+          this.appService.deletePreviews()
+        })
+    }
+
   }
 
-  // @SubscribeMessage('previewSmall')
-  // handleSmallPreview(client: Socket, request: string) {
-  //   let requestData = JSON.parse(request)
-  //   this.appService.xmlrpcRequest(
-  //     'call',
-  //     [requestData['session'],
-  //     [
-  //       ['print.loadJobFromSpooler', parseInt(requestData['jobid'])],
-  //       ['scan.setActiveSetFile'],
-  //     ]])
-  //     // "print.loadJobFromSpooler",
-  //     // [requestData['session'],
-  //     // parseInt(requestData['jobid'])]
-  //   //)
-  //     .catch((err) => console.log(err))
-  //     .then(async () =>
-  //       this.appService.getPreview(requestData).subscribe({
-  //         next: response => client.emit('previewSmall', JSON.stringify(response)),
-  //         error: e => console.log(e),
-  //         complete: () => console.log('getPriview completed!')
-  //       }))
-
-  // }
 
   @SubscribeMessage('preview')
   handlePreview(client: Socket, request: string) {
@@ -136,7 +142,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         ['print.getParam', 'info_supports_color']
       ]])
       .catch(err => console.log(err))
-      .then(response => client.emit('getProperties', JSON.stringify(response)))
+      .then(response => {
+        client.emit('getProperties', JSON.stringify(response))
+      })
   }
 
   @SubscribeMessage('setProperties')
@@ -162,7 +170,10 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         ['print_admin.cancelJob', parseInt(requestData['jobid'])]
       ]])
       .catch(err => console.log(err))
-      .then(response => console.log(response))
+      .then(response => {
+        this.appService.deletePreview(parseInt(requestData['jobid']))
+        console.log(response)
+      })
   }
 
 }

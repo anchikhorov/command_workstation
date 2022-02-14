@@ -12,14 +12,15 @@ import * as path from 'path';
 
 @Injectable()
 export class AppService implements OnModuleDestroy {
-  //private urlEndpoint: string = "http://10.117.124.41/ScanInterface/";
-  private urlEndpoint: string = "http://192.168.182.128/ScanInterface/";
+  //private urlEndpoint: string = "http://10.117.124.187/ScanInterface/";
+  private urlEndpoint: string = "http://192.168.112.128/ScanInterface/";
   private format: string = "xml";
   private _stopPolling = new Subject<void>();
   private _startPolling = new Subject<void>();
   alljobs$?: Subscription;
   count = 0
   picturesPath = path.join(__dirname, '..', 'pictures');
+  fetchingPreviews = new Set()
 
 
   constructor(
@@ -168,16 +169,15 @@ export class AppService implements OnModuleDestroy {
     console.log('getPriview', request)
     let size = request['isFull'] ? '&w=520' : '&w=200';
     return this.httpService
-
       //.get(`${this.urlEndpoint}print.getPrintPreview?id=${request['session']}${size}`,
-      /// from this
-      .get(this.urlEndpoint +
-        'image.getFilteredData?id=' +
-        request['session'] +
-        '&x=0&y=0&w=0&h=0&w_out=600&highquality=0&set_filters_from_printparams=0&index=' +
-        request['jobid'] +
-        (new Date().getTime()),
-        /// to this
+        /// from this line
+        .get(this.urlEndpoint +
+          'image.getFilteredData?id=' +
+          request['session'] +
+          '&x=0&y=0&w=0&h=0&w_out=600&highquality=0&set_filters_from_printparams=0&index=' +
+          request['jobid'] +
+          (new Date().getTime()),
+        /// to this line
         {
           responseType: "arraybuffer",
         })
@@ -190,7 +190,7 @@ export class AppService implements OnModuleDestroy {
   }
 
   getPreviews = (session, jobs, path) => {
-    console.log('this.count', this.count)
+    //console.log('this.count', this.count)
     try {
       if (!fs.existsSync(path)) {
         fs.mkdir(path, { recursive: false }, (err) => {
@@ -208,21 +208,22 @@ export class AppService implements OnModuleDestroy {
 
         }
         if (!files.includes(String(jobs[this.count]['id']))) {
-          if (this.count < jobs.length) {
-
-            await this.xmlrpcRequest('call', [session, [['print.loadJobFromSpooler', jobs[this.count]['id'],['scan.setActiveSetFile']],]])
+          if (this.count < jobs.length && !this.fetchingPreviews.has(jobs[this.count]['id'])) {
+            this.fetchingPreviews.add(jobs[this.count]['id'])
+            await this.xmlrpcRequest('call', [session, [['print.loadJobFromSpooler', jobs[this.count]['id'], ['scan.setActiveSetFile']],]])
               .catch(err => console.log(err))
               .then(() => {
                 this.getPreview({
                   session: session,
                   jobid: jobs[this.count]['id'],
                   isFull: false
-                }).subscribe((arrayBuffer) => {
+                }).subscribe(async (arrayBuffer) => {
 
                   const controller = new AbortController();
                   const { signal } = controller;
-                  writeFile(`${path}\\${jobs[this.count]['id']}`, Buffer.from(arrayBuffer), { signal });
+                  await writeFile(`${path}\\${jobs[this.count]['id']}`, Buffer.from(arrayBuffer), { signal });
                   //fs.writeFileSync(`${path}\\${jobs[this.count]['id']}`, Buffer.from(arrayBuffer))
+                  this.fetchingPreviews.delete(jobs[this.count]['id'])
                   this.count++
                   this.getPreviews(session, jobs, path)
                 })
@@ -251,6 +252,25 @@ export class AppService implements OnModuleDestroy {
         console.log(`${this.picturesPath}/${id} was deleted`);
       });
     }
+
+  }
+
+  deletePreviews() {
+    fs.readdir(this.picturesPath, (err, data) => {
+      if (err) {
+        throw err
+      }
+      data.forEach(id => {
+        if (fs.existsSync(`${this.picturesPath}/${id}`)) {
+          console.log(`${this.picturesPath}/${id}`)
+          fs.unlink(`${this.picturesPath}/${id}`, (err) => {
+            if (err) throw err;
+            console.log(`file ${this.picturesPath}/${id} was deleted`);
+          });
+        }
+      })
+    })
+
 
   }
 

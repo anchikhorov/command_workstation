@@ -57,7 +57,7 @@
                 <td mat-cell *matCellDef="let job">{{job.state}}</td>
             </ng-container>
         
-            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-header-row (contextmenu)="onContextMenu1($event)" *matHeaderRowDef="displayedColumns; sticky: true"></tr>
             <tr 
                 mat-row (click)="onRowClick(row)" 
                 (contextmenu)="onContextMenu($event, row)"
@@ -68,13 +68,11 @@
         </div>
         <div 
              fxFlex="11" 
-             fxLayout="column" 
-             fxLayoutAlign="start center" 
+             fxLayout="column"  
              class="job-small-preview">
 
             <div 
-               fxLayout="column" 
-               fxLayoutAlign="space-around center"  
+               fxLayout="column"  
                *ngIf="!img" 
                class="preview-window shadow"
                >
@@ -96,14 +94,15 @@
             (error)="waitAndReload(img,$event)"
             class = 'preview-img shadow'
             fxLayout="row" 
-            fxLayoutAlign="space-around center">
+            >
            </div>
 
         </div>
 
 </div>
 
-<div style="visibility: hidden; position: fixed" 
+<div #trigger = "matMenuTrigger"
+    style="visibility: hidden; position: fixed" 
     [style.left]="contextMenuPosition.x"
     [style.top]="contextMenuPosition.y" 
     [matMenuTriggerFor]="contextMenu"
@@ -130,4 +129,27 @@
     </ng-template>
 </mat-menu>
 
+<div #trigger1 = "matMenuTrigger"
+    style="visibility: hidden; position: fixed" 
+    [style.left]="contextMenuPosition.x"
+    [style.top]="contextMenuPosition.y" 
+    [matMenuTriggerFor]="contextMenu1"
+    >
+</div>
+<mat-menu #contextMenu1="matMenu">
+    <ng-template matMenuContent let-item="row">
+        <button 
+        mat-menu-item (click)="onContextMenuResume(null)"
+        (contextmenu)="onRightClick($event)"
+        >Resume all jobs</button>
+        <button 
+        mat-menu-item (click)="onContextMenuDelete(null)"
+        (contextmenu)="onRightClick($event)"
+        >Delete all jobs</button>
+        <button 
+        mat-menu-item (click)="onContextMenuHold(null)"
+        (contextmenu)="onRightClick($event)"
+        >Hold all jobs</button>
+    </ng-template>
+</mat-menu>
 

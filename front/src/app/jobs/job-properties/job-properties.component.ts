@@ -85,18 +85,12 @@ export class JobPropertiesComponent implements OnInit {
       this.properties[0]['colormode'].value = properties[2].value
       this.properties[0]['copies_file'].value = properties[1]['copies_file'].value
       this.properties[0]['medium'].value = properties[1]['medium'].value
-     // this.properties[0]['medium'].values = properties[1]['medium'].values
       this.properties[0]['mediasource'].value = properties[1]['mediasource'].value
-     // this.properties[0]['mediasource'].values = properties[1]['mediasource'].values
       this.properties[0]['auto_cropping'].value = properties[1]['auto_cropping'].value
       this.properties[0]['rotation'].value = properties[1]['rotation'].value
-     // this.properties[0]['rotation'].values = properties[1]['rotation'].values
       this.properties[0]['rotate_to_orientation'].value = properties[1]['rotate_to_orientation'].value
-      //this.properties[0]['rotate_to_orientation'].values = properties[1]['rotate_to_orientation'].values
       this.properties[0]['roll_placement'].value = properties[1]['roll_placement'].value
-      //this.properties[0]['roll_placement'].values = properties[1]['roll_placement'].values
       this.properties[0]['stampoption'].value = properties[1]['stampoption'].value
-      //this.properties[0]['stampoption'].values = properties[1]['stampoption'].values
       
       
       this.form.setValue({

@@ -2,14 +2,13 @@ import { Component, OnDestroy, OnInit, QueryList, ViewChild } from '@angular/cor
 import { MatMenuTrigger } from '@angular/material/menu';
 import * as _ from "lodash";
 import { Job } from './job.model';
-//import { JobsService } from './jobs.service';
 import { SafeUrl } from '@angular/platform-browser';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { JobPreviewComponent } from './job-preview/job-preview.component';
 import { JobPropertiesComponent } from './job-properties/job-properties.component';
 import { WebSocketService } from '../web-socket.service';
 
-const BACKEND_URL: string = `http://${window.location.hostname}:3000/`
+const BACKEND_URL: string = 'api/'
 
 
 @Component({
@@ -31,13 +30,11 @@ export class JobsComponent implements OnInit, OnDestroy {
   
 
   constructor(
-    //private jobservice: JobsService,
     public dialog: MatDialog,
     private webSocketService: WebSocketService
   ) { }
 
   ngOnInit(): void {
-    //console.log(window.location.hostname)
     this.webSocketService.listen('jobs').subscribe(data =>{
       this.jobs = JSON.parse(String(data))
     })
@@ -149,8 +146,6 @@ export class JobsComponent implements OnInit, OnDestroy {
     dialogConfig.disableClose = true;
     dialogConfig.autoFocus = true;
     this.loading = false;
-    //this.jobservice.loading = true
-    //this.jobservice.jobId = id;
     let data = {
       session: this.session,
       jobid: id,
@@ -176,7 +171,6 @@ export class JobsComponent implements OnInit, OnDestroy {
       baseId: baseId
     }
     this.loading = false;
-    //this.jobservice.loading = true
     const dialogRef = this.dialog.open(JobPropertiesComponent, dialogConfig);
     dialogRef.afterClosed().subscribe(result => {
       console.log(`Dialog result: ${result}`);

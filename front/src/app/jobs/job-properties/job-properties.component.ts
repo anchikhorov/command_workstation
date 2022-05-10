@@ -1,9 +1,6 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA } from '@angular/material/dialog';
-//import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-//import { Subscription } from 'rxjs';
 import { WebSocketService } from '../../web-socket.service';
-//import { JobsService } from '../jobs.service';
 import { FormGroup, FormControl, Validators } from "@angular/forms";
 
 @Component({

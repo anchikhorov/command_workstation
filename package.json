@@ -21,7 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "back": "nest start --watch",
     "front": "npm run start --prefix front",
-    "dev": "concurrently \"npm run back\" \"npm run front\""
+    "dev": "concurrently \"npm run start:dev\" \"npm run front\""
   },
   "dependencies": {
     "@nestjs/axios": "^0.0.3",

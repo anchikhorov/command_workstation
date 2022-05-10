@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { Subscription} from 'rxjs';
 import { WebSocketService } from '../../web-socket.service';
-//import { JobsService } from '../jobs.service';
 
 @Component({
   selector: 'app-job-preview',
@@ -14,7 +13,6 @@ export class JobPreviewComponent implements OnInit {
   private previewSub!: Subscription;
   loading = false
   constructor(
-    //private jobservise: JobsService,
     private sanitizer: DomSanitizer,
     private webSocketService: WebSocketService
   ) { }

@@ -7,16 +7,17 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
-import bufferToDataUrl from "buffer-to-data-url";
+import bufferToDataUrl from 'buffer-to-data-url';
 import { Socket, Server } from 'socket.io';
 import { AppService } from './app.service';
 
 @WebSocketGateway({ cors: true })
-export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-
+export class AppGateway
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(
     @Inject(forwardRef(() => AppService)) private appService: AppService,
-  ) { }
+  ) {}
 
   @WebSocketServer() wss: Server;
   private logger: Logger = new Logger('AppGateway');
@@ -27,15 +28,15 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
-    this.appService.xmlrpcRequest('open')
+    this.appService
+      .xmlrpcRequest('open')
       .catch((err) => console.log(err))
-      .then(session => {
-        console.log(session)
-        this.appService.stopPolling()
-        this.appService.polling(session)
-        client.emit('session', session)
-      })
-
+      .then((session) => {
+        console.log(session);
+        this.appService.stopPolling();
+        this.appService.polling(session);
+        client.emit('session', session);
+      });
   }
 
   handleDisconnect(client: Socket) {
@@ -44,136 +45,144 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('resume')
   handleResume(client: Socket, request: string) {
-    let requestData = JSON.parse(request)
-    if (requestData['jobid']!= null){
-      this.appService.xmlrpcRequest(
-        "print_admin.resumeJob",
-        [requestData['session'],
-        parseInt(requestData['jobid'])]
-      )
+    const requestData = JSON.parse(request);
+    if (requestData['jobid'] != null) {
+      this.appService
+        .xmlrpcRequest('print_admin.resumeJob', [
+          requestData['session'],
+          parseInt(requestData['jobid']),
+        ])
         .catch((err) => console.log(err))
-        .then(response => {
-          client.emit('resume', response)
-        })
-    } 
-    if (requestData['jobid']=== null){
-      this.appService.xmlrpcRequest(
-        "print_admin.resumeAllJobs",
-        [requestData['session']
-      ]
-      )
-        .catch((err) => console.log(err))
-        .then(response => {
-          client.emit('resume', 'all jobs was resumed')
-          
-        })
+        .then((response) => {
+          client.emit('resume', response);
+        });
     }
-
+    if (requestData['jobid'] === null) {
+      this.appService
+        .xmlrpcRequest('print_admin.resumeAllJobs', [requestData['session']])
+        .catch((err) => console.log(err))
+        .then((response) => {
+          client.emit('resume', 'all jobs was resumed');
+        });
+    }
   }
 
   @SubscribeMessage('delete')
   handleDelete(client: Socket, request: string) {
-    let requestData = JSON.parse(request)
-    if (requestData['jobid']!= null){
-      this.appService.xmlrpcRequest(
-        "print_admin.cancelJob",
-        [requestData['session'],
-        parseInt(requestData['jobid'])]
-      )
+    const requestData = JSON.parse(request);
+    if (requestData['jobid'] != null) {
+      this.appService
+        .xmlrpcRequest('print_admin.cancelJob', [
+          requestData['session'],
+          parseInt(requestData['jobid']),
+        ])
         .catch((err) => console.log(err))
-        .then(response => {
-          client.emit('delete', `job ${requestData['jobid']} was deleted`)
-          this.appService.deletePreview(parseInt(requestData['jobid']))
-        })
+        .then((response) => {
+          client.emit('delete', `job ${requestData['jobid']} was deleted`);
+          this.appService.deletePreview(parseInt(requestData['jobid']));
+        });
     }
-    if (requestData['jobid'] === null){
-      this.appService.xmlrpcRequest(
-        "print_admin.cancelAllJobs",
-        [requestData['session']
-      ]
-      )
+    if (requestData['jobid'] === null) {
+      this.appService
+        .xmlrpcRequest('print_admin.cancelAllJobs', [requestData['session']])
         .catch((err) => console.log(err))
-        .then(response => {
-          client.emit('delete', `all jobs was deleted`)
-          this.appService.deletePreviews()
-        })
+        .then((response) => {
+          client.emit('delete', `all jobs was deleted`);
+          this.appService.deletePreviews();
+        });
     }
-
   }
-
 
   @SubscribeMessage('preview')
   handlePreview(client: Socket, request: string) {
-    let requestData = JSON.parse(request)
-    this.appService.xmlrpcRequest(
-      "print.loadJobFromSpooler",
-      [requestData['session'],
-      parseInt(requestData['jobid'])]
-    )
+    const requestData = JSON.parse(request);
+    this.appService
+      .xmlrpcRequest('print.loadJobFromSpooler', [
+        requestData['session'],
+        parseInt(requestData['jobid']),
+      ])
       .catch((err) => console.log(err))
       .then(async () =>
         this.appService.getPreview(requestData).subscribe({
-          next: response => {
-          let data = {
-            jobid: null,
-            dataUrl: null
-          }
-          data['jobid'] = parseInt(requestData['jobid']),
-          data['dataUrl'] = bufferToDataUrl("image/png", Buffer.from(response))
-          // return data
-            client.emit('preview', JSON.stringify(data))
+          next: (response) => {
+            const data = {
+              jobid: null,
+              dataUrl: null,
+            };
+            data['jobid'] = parseInt(requestData['jobid']);
+            data['dataUrl'] = bufferToDataUrl(
+              'image/png',
+              Buffer.from(response),
+            );
+            // return data
+            client.emit('preview', JSON.stringify(data));
           },
-          error: e => console.log(e),
-          complete: () => console.log('getPriview completed!')
-        }))
-
+          error: (e) => console.log(e),
+          complete: () => console.log('getPriview completed!'),
+        }),
+      );
   }
 
   @SubscribeMessage('getProperties')
   getProperties(client: Socket, request: string) {
-    let requestData = JSON.parse(request)
-    console.log(requestData)
-    this.appService.xmlrpcRequest(
-      'call',
-      [requestData['session'],
-      [
-        ['print.loadJobFromSpooler', parseInt(requestData['jobid'])],
-        ['print.getParams'],
-        ['print.getParam', 'info_supports_color']
-      ]])
-      .catch(err => console.log(err))
-      .then(response => {
-        client.emit('getProperties', JSON.stringify(response))
-      })
+    const requestData = JSON.parse(request);
+    console.log(requestData);
+    this.appService
+      .xmlrpcRequest('call', [
+        requestData['session'],
+        [
+          ['print.loadJobFromSpooler', parseInt(requestData['jobid'])],
+          ['print.getParams'],
+          ['print.getParam', 'info_supports_color'],
+        ],
+      ])
+      .catch((err) => console.log(err))
+      .then((response) => {
+        client.emit('getProperties', JSON.stringify(response));
+      });
   }
 
   @SubscribeMessage('setProperties')
   setProperties(client: Socket, request: string) {
-    let requestData = JSON.parse(request)
-    console.log(requestData)
-    this.appService.xmlrpcRequest(
-      'call',
-      [requestData['session'],
-      [
-        ['print.loadJobFromSpooler', parseInt(requestData['jobid'])],
-        ['scan.saveActiveSetFileOptions'],
-        ['print.setParam', 'copies_file', requestData['copies_file']],
-        ['print.setParam', 'medium', requestData['medium']],
-        ['print.setParam', 'mediasource', requestData['mediasource']],
-        ['print.setParam', 'auto_cropping', String(requestData['auto_cropping'])],
-        ['print.setParam', 'rotation', requestData['rotation']],
-        ['print.setParam', 'rotate_to_orientation', requestData['rotate_to_orientation']],
-        ['print.setParam', 'roll_placement', requestData['roll_placement']],
-        ['print.setParam', 'stampoption', requestData['stampoption']],
-        ['print.setParam', 'jobinfo1', requestData['baseId'] != null ? requestData['baseId'] : requestData['jobid']],
-        ['print.startSet', 0],
-        ['print_admin.cancelJob', parseInt(requestData['jobid'])]
-      ]])
-      .catch(err => console.log(err))
-      .then(response => {
-        this.appService.deletePreview(parseInt(requestData['jobid']))
-        console.log(response)
-      })
+    const requestData = JSON.parse(request);
+    console.log(requestData);
+    this.appService
+      .xmlrpcRequest('call', [
+        requestData['session'],
+        [
+          ['print.loadJobFromSpooler', parseInt(requestData['jobid'])],
+          ['scan.saveActiveSetFileOptions'],
+          ['print.setParam', 'copies_file', requestData['copies_file']],
+          ['print.setParam', 'medium', requestData['medium']],
+          ['print.setParam', 'mediasource', requestData['mediasource']],
+          [
+            'print.setParam',
+            'auto_cropping',
+            String(requestData['auto_cropping']),
+          ],
+          ['print.setParam', 'rotation', requestData['rotation']],
+          [
+            'print.setParam',
+            'rotate_to_orientation',
+            requestData['rotate_to_orientation'],
+          ],
+          ['print.setParam', 'roll_placement', requestData['roll_placement']],
+          ['print.setParam', 'stampoption', requestData['stampoption']],
+          [
+            'print.setParam',
+            'jobinfo1',
+            requestData['baseId'] != null
+              ? requestData['baseId']
+              : requestData['jobid'],
+          ],
+          ['print.startSet', 0],
+          ['print_admin.cancelJob', parseInt(requestData['jobid'])],
+        ],
+      ])
+      .catch((err) => console.log(err))
+      .then((response) => {
+        this.appService.deletePreview(parseInt(requestData['jobid']));
+        console.log(response);
+      });
   }
-
 }

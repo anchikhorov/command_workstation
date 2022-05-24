@@ -9,15 +9,14 @@ import { AngularMaterialModule } from './theme/angular-material.module';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { JobPreviewComponent } from './jobs/job-preview/job-preview.component';
 import { JobPropertiesComponent } from './jobs/job-properties/job-properties.component';
-import { ReactiveFormsModule } from "@angular/forms";
-//import { MatDialogModule } from '@angular/material/dialog';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
     JobsComponent,
     JobPreviewComponent,
-    JobPropertiesComponent
+    JobPropertiesComponent,
   ],
   imports: [
     BrowserModule,
@@ -26,8 +25,8 @@ import { ReactiveFormsModule } from "@angular/forms";
     BrowserAnimationsModule,
     AngularMaterialModule,
     FlexLayoutModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

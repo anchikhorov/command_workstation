@@ -1,4 +1,10 @@
-import { Injectable, Header, OnModuleDestroy, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  Header,
+  OnModuleDestroy,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { client } from 'davexmlrpc';
 import { Subject, timer } from 'rxjs';
@@ -13,20 +19,19 @@ import * as path from 'path';
 @Injectable()
 export class AppService implements OnModuleDestroy {
   //private urlEndpoint: string = "http://10.117.124.187/ScanInterface/";
-  private urlEndpoint: string = "http://192.168.112.128/ScanInterface/";
-  private format: string = "xml";
+  private urlEndpoint = 'http://192.168.112.128/ScanInterface/';
+  private format = 'xml';
   private _stopPolling = new Subject<void>();
   private _startPolling = new Subject<void>();
   alljobs$?: Subscription;
-  count = 0
+  count = 0;
   picturesPath = path.join(__dirname, '..', 'pictures');
-  fetchingPreviews = new Set()
-
+  fetchingPreviews = new Set();
 
   constructor(
     private readonly httpService: HttpService,
     @Inject(forwardRef(() => AppGateway)) private wsGateway: AppGateway,
-  ) { }
+  ) {}
 
   xmlrpcRequest(method: string, params?: any[]): Promise<any> {
     const xmlrpcRequestPromise = () => {
@@ -38,123 +43,138 @@ export class AppService implements OnModuleDestroy {
           resolve(data);
         });
       });
-    }
-    return xmlrpcRequestPromise()
+    };
+    return xmlrpcRequestPromise();
   }
 
-
   polling(session: string) {
-    this.count = 0
+    this.count = 0;
     this.alljobs$ = timer(0, 10000)
       .pipe(
-        switchMap(async () => from(this.xmlrpcRequest("print_admin.getAllJobs", [session, '', '', 10])
-          .catch((err) => {
-            console.log(err)
-            this.stopPolling()
-          })
-        ).pipe(
-          map(jobs => {
-            return jobs.map(async (job: any) => {
-              await this.xmlrpcRequest('call', [session, [['print.loadJobFromSpooler', job.id], ["print.getParam", "jobinfo1"]]])
-                .catch(err => {
-                  console.log(err)
-                  return
-                })
-                .then((data) => {
-                  job.baseId = parseInt(data[1].value)
-                })
-                .finally(() => {
-                  job.created = moment(parseFloat(job.created) * 1000).format('DD.MM.YYYY, HH:mm:ss')
-                  job.size = parseFloat((job.size / 1048576).toFixed(2))
-                  return job
-                })
-              return job
-            })
-          })
-        )
-          .subscribe(
-            {
+        switchMap(async () =>
+          from(
+            this.xmlrpcRequest('print_admin.getAllJobs', [
+              session,
+              '',
+              '',
+              10,
+            ]).catch((err) => {
+              console.log(err);
+              this.stopPolling();
+            }),
+          )
+            .pipe(
+              map((jobs) => {
+                return jobs.map(async (job: any) => {
+                  await this.xmlrpcRequest('call', [
+                    session,
+                    [
+                      ['print.loadJobFromSpooler', job.id],
+                      ['print.getParam', 'jobinfo1'],
+                    ],
+                  ])
+                    .catch((err) => {
+                      console.log(err);
+                      return;
+                    })
+                    .then((data) => {
+                      job.baseId = parseInt(data[1].value);
+                    })
+                    .finally(() => {
+                      job.created = moment(
+                        parseFloat(job.created) * 1000,
+                      ).format('DD.MM.YYYY, HH:mm:ss');
+                      job.size = parseFloat((job.size / 1048576).toFixed(2));
+                      return job;
+                    });
+                  return job;
+                });
+              }),
+            )
+            .subscribe({
               next: (jobs: any) => {
                 try {
                   Promise.all(jobs)
-                    .catch(err => {
-                      return
+                    .catch((err) => {
+                      return;
                     })
                     .then((jobs: any[]) => {
-                      let sortedjobs: any[]
+                      let sortedjobs: any[];
                       try {
                         if (jobs.length == 0) {
-                          this.count = 0
+                          this.count = 0;
                         }
                         if (jobs.length > 0) {
-                          sortedjobs = jobs.sort(this.sortWithBaseId)
-                          this.getPreviews(session, sortedjobs, this.picturesPath)
+                          sortedjobs = jobs.sort(this.sortWithBaseId);
+                          this.getPreviews(
+                            session,
+                            sortedjobs,
+                            this.picturesPath,
+                          );
                         }
-                        this.wsGateway.wss.emit('jobs', JSON.stringify(sortedjobs))
+                        this.wsGateway.wss.emit(
+                          'jobs',
+                          JSON.stringify(sortedjobs),
+                        );
+                      } catch {
+                        console.log('no jobs');
                       }
-                      catch {
-                        console.log('no jobs')
-                      }
-
-                    })
+                    });
+                } catch {
+                  console.log('catch worked');
                 }
-                catch {
-                  console.log("catch worked")
-                }
-
               },
               error: (e: any) => console.error(e),
-              complete: () => null
-            })),
+              complete: () => null,
+            }),
+        ),
         takeUntil(this._stopPolling),
-        repeatWhen(() => this._startPolling)
+        repeatWhen(() => this._startPolling),
       )
-      .subscribe()
+      .subscribe();
   }
 
   sortWithBaseId(a: any, b: any) {
     if (a.baseId && !b.baseId) {
       if (a.baseId > b.id) {
-        return 1
+        return 1;
       }
 
       if (a.baseId < b.id) {
-        return -1
+        return -1;
       }
-
     }
     if (!a.baseId && b.baseId) {
       if (a.id > b.baseId) {
-        return 1
+        return 1;
       }
 
       if (a.id < b.baseId) {
-        return -1
+        return -1;
       }
     }
 
     if (a.baseId && b.baseId) {
       if (a.baseId > b.baseId) {
-        return 1
+        return 1;
       }
 
       if (a.baseId < b.baseId) {
-        return -1
+        return -1;
       }
     }
 
     if (!a.baseId && !b.baseId) {
       if (a.id > b.id) {
-        return 1
+        return 1;
       }
 
       if (a.id < b.id) {
-        return -1
+        return -1;
       }
     }
 
-    return 0
-
+    return 0;
   }
 
   startPolling(): void {
@@ -164,29 +184,32 @@ export class AppService implements OnModuleDestroy {
     this._stopPolling.next();
   }
 
-  @Header("Content-Type", "image/png")
+  @Header('Content-Type', 'image/png')
   getPreview(request: any) {
-    console.log('getPriview', request)
-    let size = request['isFull'] ? '&w=520' : '&w=200';
-    return this.httpService
-      //.get(`${this.urlEndpoint}print.getPrintPreview?id=${request['session']}${size}`,
+    console.log('getPriview', request);
+    const size = request['isFull'] ? '&w=520' : '&w=200';
+    return (
+      this.httpService
+        //.get(`${this.urlEndpoint}print.getPrintPreview?id=${request['session']}${size}`,
         /// from this line
-        .get(this.urlEndpoint +
-          'image.getFilteredData?id=' +
-          request['session'] +
-          '&x=0&y=0&w=0&h=0&w_out=600&highquality=0&set_filters_from_printparams=0&index=' +
-          request['jobid'] +
-          (new Date().getTime()),
-        /// to this line
-        {
-          responseType: "arraybuffer",
-        })
-      .pipe(
-        map(response => {
-          return response.data
-        })
-      )
-
+        .get(
+          this.urlEndpoint +
+            'image.getFilteredData?id=' +
+            request['session'] +
+            '&x=0&y=0&w=0&h=0&w_out=600&highquality=0&set_filters_from_printparams=0&index=' +
+            request['jobid'] +
+            new Date().getTime(),
+          /// to this line
+          {
+            responseType: 'arraybuffer',
+          },
+        )
+        .pipe(
+          map((response) => {
+            return response.data;
+          }),
+        )
+    );
   }
 
   getPreviews = (session, jobs, path) => {
@@ -200,50 +223,57 @@ export class AppService implements OnModuleDestroy {
       fs.readdir(path, async (err, files) => {
         for (let i = 0; i < jobs.length; i++) {
           if (!files.includes(String(jobs[i]['id']))) {
-            this.count = i
-            break
+            this.count = i;
+            break;
           } else {
-            this.count = 0
+            this.count = 0;
           }
-
         }
         if (!files.includes(String(jobs[this.count]['id']))) {
-          if (this.count < jobs.length && !this.fetchingPreviews.has(jobs[this.count]['id'])) {
-            this.fetchingPreviews.add(jobs[this.count]['id'])
-            await this.xmlrpcRequest('call', [session, [['print.loadJobFromSpooler', jobs[this.count]['id'], ['scan.setActiveSetFile']],]])
-              .catch(err => console.log(err))
+          if (
+            this.count < jobs.length &&
+            !this.fetchingPreviews.has(jobs[this.count]['id'])
+          ) {
+            this.fetchingPreviews.add(jobs[this.count]['id']);
+            await this.xmlrpcRequest('call', [
+              session,
+              [
+                [
+                  'print.loadJobFromSpooler',
+                  jobs[this.count]['id'],
+                  ['scan.setActiveSetFile'],
+                ],
+              ],
+            ])
+              .catch((err) => console.log(err))
               .then(() => {
                 this.getPreview({
                   session: session,
                   jobid: jobs[this.count]['id'],
-                  isFull: false
+                  isFull: false,
                 }).subscribe(async (arrayBuffer) => {
-
                   const controller = new AbortController();
                   const { signal } = controller;
-                  await writeFile(`${path}\\${jobs[this.count]['id']}`, Buffer.from(arrayBuffer), { signal });
+                  await writeFile(
+                    `${path}\\${jobs[this.count]['id']}`,
+                    Buffer.from(arrayBuffer),
+                    { signal },
+                  );
                   //fs.writeFileSync(`${path}\\${jobs[this.count]['id']}`, Buffer.from(arrayBuffer))
-                  this.fetchingPreviews.delete(jobs[this.count]['id'])
-                  this.count++
-                  this.getPreviews(session, jobs, path)
-                })
-
-              })
-
+                  this.fetchingPreviews.delete(jobs[this.count]['id']);
+                  this.count++;
+                  this.getPreviews(session, jobs, path);
+                });
+              });
           }
-
         }
-
-      })
-
+      });
+    } catch {
+      console.log('catch', this.count);
+      console.log('previews catch');
+      this.count = 0;
     }
-    catch {
-      console.log('catch', this.count)
-      console.log('previews catch')
-      this.count = 0
-    }
-
-  }
+  };
 
   deletePreview(id: number) {
     if (fs.existsSync(`${this.picturesPath}/${id}`)) {
@@ -252,36 +282,26 @@ export class AppService implements OnModuleDestroy {
         console.log(`${this.picturesPath}/${id} was deleted`);
       });
     }
-
   }
 
   deletePreviews() {
     fs.readdir(this.picturesPath, (err, data) => {
       if (err) {
-        throw err
+        throw err;
       }
-      data.forEach(id => {
+      data.forEach((id) => {
         if (fs.existsSync(`${this.picturesPath}/${id}`)) {
-          console.log(`${this.picturesPath}/${id}`)
+          console.log(`${this.picturesPath}/${id}`);
           fs.unlink(`${this.picturesPath}/${id}`, (err) => {
             if (err) throw err;
             console.log(`file ${this.picturesPath}/${id} was deleted`);
           });
         }
-      })
-    })
-
-
+      });
+    });
   }
-
-
 
   onModuleDestroy() {
-    this.stopPolling()
+    this.stopPolling();
   }
-
-
 }
-
-
-

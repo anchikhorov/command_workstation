@@ -16,6 +16,6 @@ async function bootstrap() {
   });
   app.use(cookieParser());
   app.use('/pictures', express.static(path.join(__dirname, '..', 'pictures')));
-  await app.listen(3000);
+  await app.listen(3002);
 }
 bootstrap();

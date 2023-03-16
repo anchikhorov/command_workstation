@@ -8,7 +8,13 @@ import {
 import { HttpService } from '@nestjs/axios';
 import { client } from 'davexmlrpc';
 import { Subject, timer } from 'rxjs';
-import { map, switchMap, takeUntil, repeatWhen } from 'rxjs/operators';
+import {
+  map,
+  // switchMap,
+  concatMap,
+  takeUntil,
+  repeatWhen,
+} from 'rxjs/operators';
 import { Subscription, from } from 'rxjs';
 import { AppGateway } from './app.gateway';
 import * as moment from 'moment';
@@ -19,7 +25,7 @@ import * as path from 'path';
 @Injectable()
 export class AppService implements OnModuleDestroy {
   //private urlEndpoint: string = "http://10.117.124.187/ScanInterface/";
-  private urlEndpoint = 'http://192.168.112.128/ScanInterface/';
+  private urlEndpoint = 'http://10.10.105.107/ScanInterface/';
   private format = 'xml';
   private _stopPolling = new Subject<void>();
   private _startPolling = new Subject<void>();
@@ -51,7 +57,7 @@ export class AppService implements OnModuleDestroy {
     this.count = 0;
     this.alljobs$ = timer(0, 10000)
       .pipe(
-        switchMap(async () =>
+        concatMap(async () =>
           from(
             this.xmlrpcRequest('print_admin.getAllJobs', [
               session,
@@ -212,7 +218,7 @@ export class AppService implements OnModuleDestroy {
     );
   }
 
-  getPreviews = (session, jobs, path) => {
+  getPreviews = (session: string, jobs: string | any[], path: fs.PathLike) => {
     //console.log('this.count', this.count)
     try {
       if (!fs.existsSync(path)) {
